@@ -10,26 +10,30 @@ namespace OsbizTaxation;
 public partial class App : Application
 {
     private const string InstanceMutexName = @"Local\OsbizTaxation.SingleInstance";
+    private const string ActivateEventName = @"Local\OsbizTaxation.Activate";
     private Mutex? _instanceMutex;
+    private EventWaitHandle? _activateEvent;
     private bool _ownsMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        _activateEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ActivateEventName);
+
         _instanceMutex = new Mutex(true, InstanceMutexName, out bool createdNew);
         _ownsMutex = createdNew;
 
         if (!createdNew)
         {
-            MessageBox.Show(
-                "Taxation OSBIZ est déjà ouvert. Un seul lancement est autorisé.",
-                "Taxation OSBIZ",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            _activateEvent.Set();
+            _activateEvent.Dispose();
+            _activateEvent = null;
             _instanceMutex.Dispose();
             _instanceMutex = null;
             Shutdown();
             return;
         }
+
+        StartActivationListener();
 
         base.OnStartup(e);
 
@@ -52,8 +56,36 @@ public partial class App : Application
             main.Show();
     }
 
+    private void StartActivationListener()
+    {
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                while (_activateEvent != null && _activateEvent.WaitOne())
+                {
+                    Dispatcher.Invoke(() => (MainWindow as MainWindow)?.RestoreFromTray());
+                }
+            }
+            catch
+            {
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "OsbizTaxation.Activation",
+        };
+        thread.Start();
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
+        if (_activateEvent != null)
+        {
+            _activateEvent.Dispose();
+            _activateEvent = null;
+        }
+
         if (_instanceMutex != null)
         {
             if (_ownsMutex)

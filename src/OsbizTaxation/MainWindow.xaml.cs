@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
 using OsbizTaxation.Views;
-using WinForms = System.Windows.Forms;
 
 namespace OsbizTaxation;
 
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel = new();
-    private readonly WinForms.NotifyIcon _tray = new();
+    private readonly TrayIcon _tray = new();
     private System.Drawing.Icon? _trayIcon;
     private bool _startupUpdateChecked;
     private bool _restoring;
+    private bool _balloonShown;
 
     public MainWindow()
     {
         InitializeComponent();
-        Icon = GetExecutableIcon() ?? WindowIcons.Create(WindowIcons.Headset);
+        Icon = AppIcon.WindowIcon() ?? WindowIcons.Create(WindowIcons.Headset);
+        _trayIcon = AppIcon.TrayHandle();
         DataContext = _viewModel;
         Title = $"Taxation OSBIZ  ({_viewModel.Version})";
         UpdateThemeUi();
@@ -30,58 +29,18 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         StateChanged += OnStateChanged;
         Closed += OnClosed;
-        InitTrayIcon();
     }
 
     // ---------------------------------------------------------------------
-    // Icone (celle de l'executable) et icone de la zone de notification
+    // Icone de la zone de notification
     // ---------------------------------------------------------------------
 
-    private static System.Windows.Media.ImageSource? GetExecutableIcon()
-    {
-        try
-        {
-            var path = Environment.ProcessPath;
-            if (!string.IsNullOrEmpty(path))
-            {
-                using var ico = System.Drawing.Icon.ExtractAssociatedIcon(path);
-                if (ico != null)
-                {
-                    return Imaging.CreateBitmapSourceFromHIcon(
-                        ico.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                }
-            }
-        }
-        catch
-        {
-        }
+    private string TrayTooltip => $"Taxation OSBIZ ({_viewModel.Version})";
 
-        return null;
-    }
+    private System.Drawing.Icon TrayHandle => _trayIcon ?? System.Drawing.SystemIcons.Application;
 
-    private void InitTrayIcon()
-    {
-        try
-        {
-            var path = Environment.ProcessPath;
-            if (!string.IsNullOrEmpty(path))
-                _trayIcon = System.Drawing.Icon.ExtractAssociatedIcon(path);
-
-            _tray.Icon = _trayIcon ?? System.Drawing.SystemIcons.Application;
-            _tray.Text = $"Taxation OSBIZ ({_viewModel.Version})";
-            _tray.Visible = false;
-
-            var menu = new WinForms.ContextMenuStrip();
-            menu.Items.Add("Ouvrir", null, (_, _) => RestoreFromTray());
-            menu.Items.Add(new WinForms.ToolStripSeparator());
-            menu.Items.Add("Quitter", null, (_, _) => QuitApplication());
-            _tray.ContextMenuStrip = menu;
-            _tray.DoubleClick += (_, _) => RestoreFromTray();
-        }
-        catch
-        {
-        }
-    }
+    private bool EnsureTrayIcon()
+        => _tray.IsVisible || _tray.Show(this, TrayTooltip, TrayHandle, RestoreFromTray, RestoreFromTray, QuitApplication);
 
     /// <summary>Reduit la fenetre dans la zone de notification au lieu de la barre des taches.</summary>
     private void OnStateChanged(object? sender, EventArgs e)
@@ -89,11 +48,22 @@ public partial class MainWindow : Window
         if (_restoring)
             return;
 
-        if (WindowState == WindowState.Minimized && IsVisible)
+        if (WindowState != WindowState.Minimized || !IsVisible)
+            return;
+
+        if (!EnsureTrayIcon())
         {
-            ShowInTaskbar = false;
-            Hide();
-            _tray.Visible = true;
+            AppLog.Write("Reduction annulee : impossible de creer l'icone de notification.");
+            return;
+        }
+
+        ShowInTaskbar = false;
+        Hide();
+
+        if (!_balloonShown)
+        {
+            _balloonShown = true;
+            _tray.ShowBalloon("Taxation OSBIZ", "L'application est reduite ici. Double-cliquez pour la rouvrir.");
         }
     }
 
@@ -103,7 +73,7 @@ public partial class MainWindow : Window
         _restoring = true;
         try
         {
-            _tray.Visible = false;
+            _tray.Hide();
             ShowInTaskbar = true;
             Show();
             WindowState = WindowState.Maximized;
@@ -121,8 +91,17 @@ public partial class MainWindow : Window
     /// <summary>Demarre l'application sans afficher la fenetre (uniquement l'icone de notification).</summary>
     public void StartHiddenToTray()
     {
-        ShowInTaskbar = false;
-        _tray.Visible = true;
+        if (EnsureTrayIcon())
+        {
+            ShowInTaskbar = false;
+        }
+        else
+        {
+            AppLog.Write("Demarrage reduit impossible : la fenetre est affichee minimisee.");
+            Show();
+            WindowState = WindowState.Minimized;
+        }
+
         RunStartupUpdateCheck();
     }
 
@@ -137,7 +116,7 @@ public partial class MainWindow : Window
 
     private void QuitApplication()
     {
-        _tray.Visible = false;
+        _tray.Hide();
         Close();
     }
 
@@ -173,7 +152,6 @@ public partial class MainWindow : Window
         ConfigService.Save(_viewModel.Config);
         _viewModel.Dispose();
 
-        _tray.Visible = false;
         _tray.Dispose();
         _trayIcon?.Dispose();
 

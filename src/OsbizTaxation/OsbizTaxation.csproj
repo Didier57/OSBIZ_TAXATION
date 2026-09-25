@@ -10,10 +10,10 @@
     <RootNamespace>OsbizTaxation</RootNamespace>
     <AssemblyName>OsbizTaxation</AssemblyName>
 
-    <Version>1.4.0</Version>
-    <FileVersion>1.4.0.0</FileVersion>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <InformationalVersion>1.4.0</InformationalVersion>
+    <Version>1.4.1</Version>
+    <FileVersion>1.4.1.0</FileVersion>
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
+    <InformationalVersion>1.4.1</InformationalVersion>
     <Product>OSBIZ TAXATION</Product>
     <Company>Didier57</Company>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
@@ -32,9 +32,16 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
   </ItemGroup>
 
-  <!-- WinForms est active uniquement pour le NotifyIcon (icone de la zone de
-       notification). On retire ses implicit usings pour eviter les conflits
-       (ex : MessageBox ambigu entre System.Windows et System.Windows.Forms). -->
+  <!-- L'icone est embarquee comme ressource WPF pour pouvoir la charger via
+       pack URI (barre de titre et zone de notification). -->
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+  <!-- WinForms est active uniquement pour le menu contextuel de l'icone de la
+       zone de notification. On retire ses implicit usings pour eviter les
+       conflits (ex : MessageBox ambigu entre System.Windows et
+       System.Windows.Forms). -->
   <ItemGroup>
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
