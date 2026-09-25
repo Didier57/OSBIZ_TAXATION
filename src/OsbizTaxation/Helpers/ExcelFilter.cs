@@ -7,6 +7,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace OsbizTaxation.Helpers;
 
@@ -62,7 +63,7 @@ public static class ExcelFilter
         }
 
         grid.Loaded += (_, _) => InstallView(grid);
-        grid.PreviewMouseRightButtonDown += (_, e) => OnGridRightClick(grid, e);
+        grid.PreviewMouseRightButtonUp += (_, e) => OnGridRightClick(grid, e);
         InstallView(grid);
     }
 
@@ -79,7 +80,7 @@ public static class ExcelFilter
             return;
 
         e.Handled = true;
-        ShowPopup(grid, filter, header);
+        grid.Dispatcher.BeginInvoke(new Action(() => ShowPopup(grid, filter, header)), DispatcherPriority.Input);
     }
 
     private static DataGridColumnHeader? FindHeader(DependencyObject? source)
