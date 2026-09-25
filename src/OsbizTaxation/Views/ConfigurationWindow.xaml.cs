@@ -162,6 +162,7 @@ public partial class ConfigurationWindow : Window
         }
 
         BtnTestEmail.IsEnabled = false;
+        AppLog.Write($"Test email demande vers '{destinataire}'.");
         try
         {
             await EmailService.EnvoyerAsync(email, destinataire,
@@ -172,7 +173,11 @@ public partial class ConfigurationWindow : Window
         }
         catch (Exception ex)
         {
-            Warn("Echec de l'envoi : " + ex.Message);
+            AppLog.WriteException("Test email : echec.", ex);
+            MessageBox.Show(
+                "Echec de l'envoi : " + AppLog.Describe(ex)
+                + $"\n\nDetails complets dans le journal :\n{AppLog.LogPath}",
+                "Email", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
         {

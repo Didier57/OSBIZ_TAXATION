@@ -14,17 +14,41 @@ public static class EmailService
         string corps,
         CancellationToken ct = default)
     {
+        AppLog.Write("=== Envoi email : debut ===");
+
         if (config is null)
-            throw new InvalidOperationException("Aucune configuration email.");
+            throw Fail("Aucune configuration email.");
 
         if (string.IsNullOrWhiteSpace(config.Hote))
-            throw new InvalidOperationException("Le serveur SMTP (hote) n'est pas configure.");
+            throw Fail("Le serveur SMTP (hote) n'est pas configure.");
 
         if (string.IsNullOrWhiteSpace(config.Expediteur))
-            throw new InvalidOperationException("L'adresse de l'expediteur n'est pas configuree.");
+            throw Fail("L'adresse de l'expediteur n'est pas configuree.");
 
         if (string.IsNullOrWhiteSpace(destinataire))
-            throw new InvalidOperationException("Aucun destinataire.");
+            throw Fail("Aucun destinataire.");
+
+        var port = config.Port is >= 1 and <= 65535 ? config.Port : 587;
+
+        AppLog.Write($"Parametres : hote='{config.Hote}' port={port} ssl={config.UseSsl} " +
+                     $"login='{config.Login}' motDePasse={(string.IsNullOrEmpty(config.MotDePasse) ? "vide" : "renseigne")}");
+        AppLog.Write($"Expediteur='{config.Expediteur}' nomAffiche='{config.NomAffiche}' destinataire='{destinataire}'");
+
+        if (port == 465)
+            AppLog.Write("Remarque : le port 465 utilise SSL implicite, non gere par SmtpClient. " +
+                         "Preferer le port 587 (STARTTLS) ou 25.");
+
+        try
+        {
+            AppLog.Write($"Resolution DNS de '{config.Hote}'...");
+            var addresses = await Dns.GetHostAddressesAsync(config.Hote, ct);
+            AppLog.Write("DNS OK : " + string.Join(", ", addresses.Select(a => a.ToString())));
+        }
+        catch (Exception ex)
+        {
+            AppLog.WriteException($"Echec de resolution DNS de '{config.Hote}'", ex);
+            throw;
+        }
 
         using var message = new MailMessage();
         message.From = string.IsNullOrWhiteSpace(config.NomAffiche)
@@ -35,19 +59,44 @@ public static class EmailService
         message.Body = corps;
         message.IsBodyHtml = false;
 
-        var port = config.Port is >= 1 and <= 65535 ? config.Port : 587;
-
         using var client = new SmtpClient(config.Hote, port)
         {
             EnableSsl = config.UseSsl,
-            DeliveryMethod = SmtpDeliveryMethod.Network
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            Timeout = 30000
         };
 
         if (!string.IsNullOrWhiteSpace(config.Login))
+        {
             client.Credentials = new NetworkCredential(config.Login, config.MotDePasse);
+            AppLog.Write("Authentification : identifiants fournis.");
+        }
         else
+        {
             client.UseDefaultCredentials = false;
+            AppLog.Write("Authentification : aucune (UseDefaultCredentials=false).");
+        }
 
-        await client.SendMailAsync(message, ct);
+        try
+        {
+            AppLog.Write($"Connexion SMTP a {config.Hote}:{port} (ssl={config.UseSsl}) et envoi...");
+            await client.SendMailAsync(message, ct);
+            AppLog.Write("Envoi reussi.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.WriteException($"Echec de l'envoi SMTP vers {config.Hote}:{port}", ex);
+            throw;
+        }
+        finally
+        {
+            AppLog.Write("=== Envoi email : fin ===");
+        }
+    }
+
+    private static InvalidOperationException Fail(string message)
+    {
+        AppLog.Write("Echec : " + message);
+        return new InvalidOperationException(message);
     }
 }
