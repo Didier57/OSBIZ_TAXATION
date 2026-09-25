@@ -72,7 +72,52 @@
             </TabItem>
 
             <TabItem Header="TOP Dur&#233;e">
-                <TextBlock Text="&#192; venir" Margin="12" />
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <TextBlock Text="P&#233;riode" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox x:Name="CmdTopPeriode" Width="90" SelectionChanged="OnTopFilterChanged">
+                            <ComboBoxItem Content="Jour" />
+                            <ComboBoxItem Content="Mois" />
+                            <ComboBoxItem Content="Ann&#233;e" />
+                        </ComboBox>
+                        <Button x:Name="BtnTopPrec" Content="&#x25C4;" Width="34" Margin="10,0,0,0" Click="OnTopPrecClick" ToolTip="P&#233;riode pr&#233;c&#233;dente" />
+                        <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,6,0" />
+                        <DatePicker x:Name="DpTopDate" Width="140" SelectedDateChanged="OnTopDateChanged" />
+                        <Button x:Name="BtnTopSuiv" Content="&#x25BA;" Width="34" Margin="6,0,0,0" Click="OnTopSuivClick" ToolTip="P&#233;riode suivante" />
+                        <TextBlock Text="Site" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <ComboBox x:Name="CmdTopSite" Width="150" SelectionChanged="OnTopFilterChanged" />
+                        <TextBlock Text="Type" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <ComboBox x:Name="CmdTopType" Width="100" SelectionChanged="OnTopFilterChanged">
+                            <ComboBoxItem Content="Entrant" />
+                            <ComboBoxItem Content="Sortant" />
+                        </ComboBox>
+                        <TextBlock Text="Nombre de TOP" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <ComboBox x:Name="CmdTopNombre" Width="60" SelectionChanged="OnTopFilterChanged" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <helpers:PieChart x:Name="TopChart" Grid.Column="0" />
+
+                        <DataGrid x:Name="GridTop" Grid.Column="1" Width="320" Margin="16,0,0,0"
+                                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                  HeadersVisibility="Column" RowHeaderWidth="0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="*" />
+                                <DataGridTextColumn Header="Dur&#233;e appel" Binding="{Binding DureeAffichee}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
             </TabItem>
             <TabItem Header="Pays">
                 <TextBlock Text="&#192; venir" Margin="12" />

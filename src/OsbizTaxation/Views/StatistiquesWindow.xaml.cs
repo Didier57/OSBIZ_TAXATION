@@ -24,12 +24,15 @@ public partial class StatistiquesWindow : Window
         {
             CmdSite.Items.Add(site.Nom);
             CmdSiteHeure.Items.Add(site.Nom);
+            CmdTopSite.Items.Add(site.Nom);
         }
 
         if (CmdSite.Items.Count > 0)
             CmdSite.SelectedIndex = 0;
         if (CmdSiteHeure.Items.Count > 0)
             CmdSiteHeure.SelectedIndex = 0;
+        if (CmdTopSite.Items.Count > 0)
+            CmdTopSite.SelectedIndex = 0;
 
         PopulateYears(today.Year);
 
@@ -39,9 +42,17 @@ public partial class StatistiquesWindow : Window
 
         DpHeureDate.SelectedDate = today;
 
+        CmdTopPeriode.SelectedIndex = 1;
+        CmdTopType.SelectedIndex = 0;
+        for (int i = 5; i <= 10; i++)
+            CmdTopNombre.Items.Add(i);
+        CmdTopNombre.SelectedIndex = 0;
+        DpTopDate.SelectedDate = today;
+
         _initialise = false;
         Refresh();
         RefreshHeure();
+        RefreshTop();
     }
 
     private void PopulateYears(int defaultYear)
@@ -191,6 +202,81 @@ public partial class StatistiquesWindow : Window
         => DateTime.TryParseExact(dateIso, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
             ? d.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
             : dateIso;
+
+    private string TopPeriode
+        => (CmdTopPeriode.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Mois";
+
+    private void OnTopFilterChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshTop();
+    }
+
+    private void OnTopDateChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshTop();
+    }
+
+    private void OnTopPrecClick(object sender, RoutedEventArgs e) => ShiftTop(-1);
+
+    private void OnTopSuivClick(object sender, RoutedEventArgs e) => ShiftTop(1);
+
+    private void ShiftTop(int sens)
+    {
+        var date = DpTopDate.SelectedDate ?? DateTime.Today;
+        date = TopPeriode switch
+        {
+            "Mois" => date.AddMonths(sens),
+            "Année" => date.AddYears(sens),
+            _ => date.AddDays(sens)
+        };
+        DpTopDate.SelectedDate = date;
+        RefreshTop();
+    }
+
+    private static string Iso(DateTime d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private (string Debut, string Fin) GetTopPlage()
+    {
+        var date = DpTopDate.SelectedDate ?? DateTime.Today;
+        switch (TopPeriode)
+        {
+            case "Mois":
+                var premier = new DateTime(date.Year, date.Month, 1);
+                return (Iso(premier), Iso(premier.AddMonths(1).AddDays(-1)));
+            case "Année":
+                return (Iso(new DateTime(date.Year, 1, 1)), Iso(new DateTime(date.Year, 12, 31)));
+            default:
+                return (Iso(date), Iso(date));
+        }
+    }
+
+    private void RefreshTop()
+    {
+        if (CmdTopSite.SelectedItem is not string site || string.IsNullOrWhiteSpace(site))
+        {
+            TopChart.Items = Array.Empty<PieSlice>();
+            GridTop.ItemsSource = null;
+            return;
+        }
+
+        var (debut, fin) = GetTopPlage();
+        bool entrant = (CmdTopType.SelectedItem as ComboBoxItem)?.Content?.ToString() != "Sortant";
+        int top = CmdTopNombre.SelectedItem is int n ? n : 5;
+
+        var rows = _main.Repository.GetTopDurations(site, debut, fin, entrant, top);
+        GridTop.ItemsSource = rows;
+
+        var slices = new List<PieSlice>(rows.Count);
+        foreach (var r in rows)
+            slices.Add(new PieSlice(r.NumeroInterne, r.Secondes, DurationFormat.Compact(r.Secondes)));
+
+        TopChart.Items = slices;
+        TopChart.Title = rows.Count > 0 ? $"TOP {rows.Count} Durée" : "TOP Durée";
+    }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();
 }

@@ -466,6 +466,40 @@ ORDER BY H;";
         return list;
     }
 
+    /// <summary>Postes ayant cumule le plus de duree d'appel sur une periode, pour un type (entrant/sortant).</summary>
+    public List<TopDuration> GetTopDurations(string site, string dateIsoDebut, string dateIsoFin, bool entrant, int top)
+    {
+        var list = new List<TopDuration>();
+        var condition = entrant
+            ? "(InfoCode % 10) IN (1, 3, 5, 7)"
+            : "(InfoCode % 10) IN (2, 4, 6, 8, 9, 0)";
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = $@"
+SELECT NumeroInterne, SUM(DureeAppelSecondes) AS Total
+FROM Cdr
+WHERE Site = $site AND DateIso >= $debut AND DateIso <= $fin
+  AND NumeroInterne IS NOT NULL AND NumeroInterne <> ''
+  AND {condition}
+GROUP BY NumeroInterne
+ORDER BY Total DESC, NumeroInterne
+LIMIT $top;";
+        cmd.Parameters.AddWithValue("$site", site);
+        cmd.Parameters.AddWithValue("$debut", dateIsoDebut);
+        cmd.Parameters.AddWithValue("$fin", dateIsoFin);
+        cmd.Parameters.AddWithValue("$top", top);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var numero = reader.IsDBNull(0) ? "" : reader.GetString(0);
+            long total = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+            list.Add(new TopDuration(numero, total));
+        }
+
+        return list;
+    }
+
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
