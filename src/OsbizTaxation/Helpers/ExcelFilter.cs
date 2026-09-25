@@ -18,22 +18,39 @@ public static class ExcelFilter
     private enum FilterMode
     {
         Equals,
+        StartsWith,
+        Contains,
+        EndsWith,
+        IsEmpty,
+        Different,
+        NotStartsWith,
+        NotContains,
+        NotEndsWith,
         Greater,
         GreaterOrEqual,
         Less,
         LessOrEqual,
-        Different,
         Between
     }
 
-    private static readonly (string Label, FilterMode Mode)[] Operators =
+    // Label == null insère un séparateur.
+    private static readonly (string? Label, FilterMode Mode)[] Operators =
     {
         ("Est égal à", FilterMode.Equals),
+        ("Commence par", FilterMode.StartsWith),
+        ("Contient", FilterMode.Contains),
+        ("Se termine par", FilterMode.EndsWith),
+        ("Est vide", FilterMode.IsEmpty),
+        (null, FilterMode.Equals),
+        ("Est différent de", FilterMode.Different),
+        ("Ne commence pas par", FilterMode.NotStartsWith),
+        ("Ne contient pas", FilterMode.NotContains),
+        ("Ne se termine pas par", FilterMode.NotEndsWith),
+        (null, FilterMode.Equals),
         ("Supérieur à", FilterMode.Greater),
         ("Supérieur ou égal à", FilterMode.GreaterOrEqual),
         ("Inférieur à", FilterMode.Less),
         ("Inférieur ou égal à", FilterMode.LessOrEqual),
-        ("Est différent de", FilterMode.Different),
         ("Compris entre 2 bornes...", FilterMode.Between)
     };
 
@@ -390,6 +407,17 @@ public static class ExcelFilter
         var operatorsPanel = new StackPanel { Visibility = Visibility.Collapsed };
         foreach (var (label, mode) in Operators)
         {
+            if (label == null)
+            {
+                operatorsPanel.Children.Add(new Border
+                {
+                    Height = 1,
+                    Background = new SolidColorBrush(Color.FromRgb(0xE0, 0xE0, 0xE0)),
+                    Margin = new Thickness(6, 3, 6, 3)
+                });
+                continue;
+            }
+
             var item = new TextBlock { Text = label, Margin = new Thickness(24, 2, 6, 2) };
             var itemBorder = new Border
             {
@@ -403,8 +431,9 @@ public static class ExcelFilter
             itemBorder.MouseLeftButtonUp += (_, _) =>
             {
                 pendingMode = captured;
-                editorLabel.Text = label + " :";
+                editorLabel.Text = captured == FilterMode.IsEmpty ? label : label + " :";
                 betweenPanel.Visibility = captured == FilterMode.Between ? Visibility.Visible : Visibility.Collapsed;
+                input1.Visibility = captured == FilterMode.IsEmpty ? Visibility.Collapsed : Visibility.Visible;
                 input1.Text = string.Empty;
                 input2.Text = string.Empty;
                 operatorsPanel.Visibility = Visibility.Collapsed;
@@ -466,7 +495,12 @@ public static class ExcelFilter
         var panel = new StackPanel { Width = 260 };
         panel.Children.Add(searchBorder);
         panel.Children.Add(filterRow);
-        panel.Children.Add(operatorsPanel);
+        panel.Children.Add(new ScrollViewer
+        {
+            MaxHeight = 340,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Content = operatorsPanel
+        });
         panel.Children.Add(editor);
         panel.Children.Add(removeRow);
         panel.Children.Add(remember);
@@ -545,7 +579,7 @@ public static class ExcelFilter
         {
             var v1 = input1.Text.Trim();
             var v2 = input2.Text.Trim();
-            if (v1.Length == 0)
+            if (pendingMode != FilterMode.IsEmpty && v1.Length == 0)
                 return;
             if (pendingMode == FilterMode.Between && v2.Length == 0)
                 return;
@@ -568,6 +602,13 @@ public static class ExcelFilter
             return mode switch
             {
                 FilterMode.Equals => CompareValues(value, value1) == 0,
+                FilterMode.StartsWith => value.StartsWith(value1, StringComparison.CurrentCultureIgnoreCase),
+                FilterMode.Contains => value.Contains(value1, StringComparison.CurrentCultureIgnoreCase),
+                FilterMode.EndsWith => value.EndsWith(value1, StringComparison.CurrentCultureIgnoreCase),
+                FilterMode.IsEmpty => value.Length == 0,
+                FilterMode.NotStartsWith => !value.StartsWith(value1, StringComparison.CurrentCultureIgnoreCase),
+                FilterMode.NotContains => !value.Contains(value1, StringComparison.CurrentCultureIgnoreCase),
+                FilterMode.NotEndsWith => !value.EndsWith(value1, StringComparison.CurrentCultureIgnoreCase),
                 FilterMode.Greater => CompareValues(value, value1) > 0,
                 FilterMode.GreaterOrEqual => CompareValues(value, value1) >= 0,
                 FilterMode.Less => CompareValues(value, value1) < 0,
