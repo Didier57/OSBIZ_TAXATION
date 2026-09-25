@@ -29,6 +29,24 @@ public sealed class PieChart : FrameworkElement
     private IReadOnlyList<PieSlice> _items = Array.Empty<PieSlice>();
     private string _title = "";
 
+    /// <summary>Couleur (figee) associee a l'index d'une part. Reutilisable pour colorer les lignes d'une table.</summary>
+    public static Brush SliceBrush(int index)
+    {
+        int n = Palette.Length;
+        var b = new SolidColorBrush(Palette[((index % n) + n) % n]);
+        b.Freeze();
+        return b;
+    }
+
+    /// <summary>Couleur de texte (noir ou blanc) offrant le meilleur contraste sur la couleur de la part.</summary>
+    public static Brush SliceForeground(int index)
+    {
+        int n = Palette.Length;
+        var c = Palette[((index % n) + n) % n];
+        double lum = 0.299 * c.R + 0.587 * c.G + 0.114 * c.B;
+        return lum > 200 ? Brushes.Black : Brushes.White;
+    }
+
     public IReadOnlyList<PieSlice> Items
     {
         get => _items;
@@ -105,8 +123,7 @@ public sealed class PieChart : FrameworkElement
             double endAngle = startAngle + sweep;
             double percent = 100.0 * it.Value / total;
 
-            var brush = new SolidColorBrush(Palette[i % Palette.Length]);
-            brush.Freeze();
+            var brush = SliceBrush(i);
 
             if (sweep >= 359.9)
             {

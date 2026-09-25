@@ -89,12 +89,14 @@
                         <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,6,0" />
                         <DatePicker x:Name="DpTopDate" Width="140" SelectedDateChanged="OnTopDateChanged" />
                         <Button x:Name="BtnTopSuiv" Content="&#x25BA;" Width="34" Margin="6,0,0,0" Click="OnTopSuivClick" ToolTip="P&#233;riode suivante" />
+                        <Button x:Name="BtnTopAujourdhui" Content="Aujourd'hui" Margin="6,0,0,0" Click="OnTopAujourdhuiClick" ToolTip="Revenir &#224; la p&#233;riode actuelle" />
                         <TextBlock Text="Site" VerticalAlignment="Center" Margin="16,0,6,0" />
                         <ComboBox x:Name="CmdTopSite" Width="150" SelectionChanged="OnTopFilterChanged" />
                         <TextBlock Text="Type" VerticalAlignment="Center" Margin="16,0,6,0" />
-                        <ComboBox x:Name="CmdTopType" Width="100" SelectionChanged="OnTopFilterChanged">
+                        <ComboBox x:Name="CmdTopType" Width="130" SelectionChanged="OnTopFilterChanged">
                             <ComboBoxItem Content="Entrant" />
                             <ComboBoxItem Content="Sortant" />
+                            <ComboBoxItem Content="Entrant/Sortant" />
                         </ComboBox>
                         <TextBlock Text="Nombre de TOP" VerticalAlignment="Center" Margin="16,0,6,0" />
                         <ComboBox x:Name="CmdTopNombre" Width="60" SelectionChanged="OnTopFilterChanged" />
@@ -111,6 +113,19 @@
                         <DataGrid x:Name="GridTop" Grid.Column="1" Width="320" Margin="16,0,0,0"
                                   AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                                   HeadersVisibility="Column" RowHeaderWidth="0">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Background" Value="{Binding Couleur}" />
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="{Binding Texte}" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Padding" Value="6,3" />
+                                </Style>
+                            </DataGrid.CellStyle>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="*" />
                                 <DataGridTextColumn Header="Dur&#233;e appel" Binding="{Binding DureeAffichee}" Width="*" />

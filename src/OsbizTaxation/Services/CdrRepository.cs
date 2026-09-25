@@ -466,21 +466,23 @@ ORDER BY H;";
         return list;
     }
 
-    /// <summary>Postes ayant cumule le plus de duree d'appel sur une periode, pour un type (entrant/sortant).</summary>
-    public List<TopDuration> GetTopDurations(string site, string dateIsoDebut, string dateIsoFin, bool entrant, int top)
+    /// <summary>Postes ayant cumule le plus de duree d'appel sur une periode, pour un type (entrant/sortant/les deux).</summary>
+    public List<TopDuration> GetTopDurations(string site, string dateIsoDebut, string dateIsoFin, bool? entrant, int top)
     {
         var list = new List<TopDuration>();
-        var condition = entrant
-            ? "(InfoCode % 10) IN (1, 3, 5, 7)"
-            : "(InfoCode % 10) IN (2, 4, 6, 8, 9, 0)";
+        var condition = entrant switch
+        {
+            true => "\n  AND (InfoCode % 10) IN (1, 3, 5, 7)",
+            false => "\n  AND (InfoCode % 10) IN (2, 4, 6, 8, 9, 0)",
+            null => "",
+        };
 
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = $@"
 SELECT NumeroInterne, SUM(DureeAppelSecondes) AS Total
 FROM Cdr
 WHERE Site = $site AND DateIso >= $debut AND DateIso <= $fin
-  AND NumeroInterne IS NOT NULL AND NumeroInterne <> ''
-  AND {condition}
+  AND NumeroInterne IS NOT NULL AND NumeroInterne <> ''{condition}
 GROUP BY NumeroInterne
 ORDER BY Total DESC, NumeroInterne
 LIMIT $top;";

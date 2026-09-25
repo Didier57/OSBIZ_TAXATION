@@ -3,15 +3,19 @@ namespace OsbizTaxation.Helpers;
 /// <summary>Mise en forme des durees (en secondes) pour l'affichage.</summary>
 public static class DurationFormat
 {
-    /// <summary>Ex. 9607 -> "2 h 40 m 7 s".</summary>
+    /// <summary>Ex. 9607 -> "2 h 40 m 7 s". Si depasse 24 h, inclut les jours : "1 j 2 h 40 m 7 s".</summary>
     public static string Hms(long secondes)
     {
         if (secondes < 0)
             secondes = 0;
 
-        long h = secondes / 3600;
+        long j = secondes / 86400;
+        long h = secondes % 86400 / 3600;
         long m = secondes % 3600 / 60;
         long s = secondes % 60;
+
+        if (j > 0)
+            return $"{j} j {h} h {m} m {s} s";
 
         var parts = new List<string>(3);
         if (h > 0)
@@ -23,16 +27,19 @@ public static class DurationFormat
         return string.Join(' ', parts);
     }
 
-    /// <summary>Version compacte. Ex. 9607 -> "2h40m7s".</summary>
+    /// <summary>Version compacte. Ex. 9607 -> "2h40m7s". Si depasse 24 h : "1j02h40m07s".</summary>
     public static string Compact(long secondes)
     {
         if (secondes < 0)
             secondes = 0;
 
-        long h = secondes / 3600;
+        long j = secondes / 86400;
+        long h = secondes % 86400 / 3600;
         long m = secondes % 3600 / 60;
         long s = secondes % 60;
 
+        if (j > 0)
+            return $"{j}j{h:00}h{m:00}m{s:00}s";
         if (h > 0)
             return $"{h}h{m:00}m{s:00}s";
         if (m > 0)

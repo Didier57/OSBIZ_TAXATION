@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.ViewModels;
 
@@ -8,6 +9,15 @@ namespace OsbizTaxation.Views;
 
 public partial class StatistiquesWindow : Window
 {
+    /// <summary>Ligne de la table TOP : texte affiche + couleur reprise du camembert.</summary>
+    public sealed class TopRow
+    {
+        public string NumeroInterne { get; init; } = "";
+        public string DureeAffichee { get; init; } = "";
+        public Brush? Couleur { get; init; }
+        public Brush? Texte { get; init; }
+    }
+
     private readonly MainViewModel _main;
     private bool _initialise = true;
 
@@ -224,6 +234,12 @@ public partial class StatistiquesWindow : Window
 
     private void OnTopSuivClick(object sender, RoutedEventArgs e) => ShiftTop(1);
 
+    private void OnTopAujourdhuiClick(object sender, RoutedEventArgs e)
+    {
+        DpTopDate.SelectedDate = DateTime.Today;
+        RefreshTop();
+    }
+
     private void ShiftTop(int sens)
     {
         var date = DpTopDate.SelectedDate ?? DateTime.Today;
@@ -264,16 +280,32 @@ public partial class StatistiquesWindow : Window
         }
 
         var (debut, fin) = GetTopPlage();
-        bool entrant = (CmdTopType.SelectedItem as ComboBoxItem)?.Content?.ToString() != "Sortant";
+        bool? entrant = (CmdTopType.SelectedItem as ComboBoxItem)?.Content?.ToString() switch
+        {
+            "Sortant" => false,
+            "Entrant/Sortant" => null,
+            _ => true,
+        };
         int top = CmdTopNombre.SelectedItem is int n ? n : 5;
 
         var rows = _main.Repository.GetTopDurations(site, debut, fin, entrant, top);
-        GridTop.ItemsSource = rows;
 
         var slices = new List<PieSlice>(rows.Count);
-        foreach (var r in rows)
+        var table = new List<TopRow>(rows.Count);
+        for (int i = 0; i < rows.Count; i++)
+        {
+            var r = rows[i];
             slices.Add(new PieSlice(r.NumeroInterne, r.Secondes, DurationFormat.Compact(r.Secondes)));
+            table.Add(new TopRow
+            {
+                NumeroInterne = r.NumeroInterne,
+                DureeAffichee = r.DureeAffichee,
+                Couleur = PieChart.SliceBrush(i),
+                Texte = PieChart.SliceForeground(i),
+            });
+        }
 
+        GridTop.ItemsSource = table;
         TopChart.Items = slices;
         TopChart.Title = rows.Count > 0 ? $"TOP {rows.Count} Durée" : "TOP Durée";
     }
