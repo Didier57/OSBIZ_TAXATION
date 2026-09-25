@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
+using OsbizTaxation.Helpers;
 using OsbizTaxation.Models;
 using OsbizTaxation.ViewModels;
 
@@ -22,6 +23,7 @@ public partial class RechercheWindow : Window
         CmdSite.SelectedIndex = 0;
 
         GridResultats.ItemsSource = Resultats;
+        ExcelFilter.Attach(GridResultats);
     }
 
     public ObservableCollection<CdrRecord> Resultats { get; } = new();

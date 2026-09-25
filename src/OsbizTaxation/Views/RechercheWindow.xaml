@@ -60,16 +60,17 @@
                   GridLinesVisibility="Horizontal"
                   EnableRowVirtualization="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="80" />
+                <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="Auto" />
+                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
                 <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
                 <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />
-                <DataGridTextColumn Header="Ligne" Binding="{Binding Ligne}" Width="55" />
-                <DataGridTextColumn Header="Nom Ligne" Binding="{Binding NomLigne}" Width="110" />
-                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="85" />
+                <DataGridTextColumn Header="Ligne" Binding="{Binding Ligne}" Width="Auto" />
+                <DataGridTextColumn Header="Nom Ligne" Binding="{Binding NomLigne}" Width="Auto" />
+                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="Auto" />
                 <DataGridTextColumn Header="Dur&#233;e" Binding="{Binding DureeAppel}" Width="75" />
-                <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="130" />
-                <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="150" />
+                <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="Auto" />
+                <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 
