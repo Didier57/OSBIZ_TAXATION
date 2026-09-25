@@ -46,7 +46,7 @@
             <Button Content="Supprimer filtres" Padding="12,4" Margin="16,0,0,0" Click="OnSupprimerFiltresClick" />
         </StackPanel>
 
-        <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="0,6" Margin="0,6,0,6">
+        <Border Grid.Row="1" BorderBrush="{DynamicResource Brush.Control.Border}" BorderThickness="0,0,0,1" Padding="0,6" Margin="0,6,0,6">
             <TextBlock x:Name="TxtResultat" Text="Aucune recherche." Foreground="Gray" />
         </Border>
 

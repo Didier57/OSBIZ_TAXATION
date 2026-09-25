@@ -21,6 +21,7 @@
     </Style>
 
     <Style TargetType="GroupBox">
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Control.Foreground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Control.Border}" />
         <Setter Property="Margin" Value="0,4,0,4" />
@@ -380,6 +381,60 @@
 
     <Style TargetType="Separator">
         <Setter Property="Background" Value="{DynamicResource Brush.Control.Border}" />
+    </Style>
+
+    <Style x:Key="ThemeScrollThumb" TargetType="Thumb">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border x:Name="Bd" CornerRadius="3" Margin="2"
+                            Background="{DynamicResource Brush.Control.Border}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Brush.Filter.Active}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="{DynamicResource Brush.Control.Background}" />
+        <Setter Property="Width" Value="13" />
+        <Setter Property="MinWidth" Value="13" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton x:Name="DecreaseBtn" Command="{x:Static ScrollBar.PageUpCommand}"
+                                              Opacity="0" Focusable="False" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton x:Name="IncreaseBtn" Command="{x:Static ScrollBar.PageDownCommand}"
+                                              Opacity="0" Focusable="False" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource ThemeScrollThumb}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter Property="Height" Value="13" />
+                            <Setter Property="MinHeight" Value="13" />
+                            <Setter Property="Width" Value="Auto" />
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                            <Setter TargetName="DecreaseBtn" Property="Command" Value="{x:Static ScrollBar.PageLeftCommand}" />
+                            <Setter TargetName="IncreaseBtn" Property="Command" Value="{x:Static ScrollBar.PageRightCommand}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="DatePicker">
