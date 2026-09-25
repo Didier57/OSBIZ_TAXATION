@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using Microsoft.Win32;
+using OsbizTaxation.Helpers;
 using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
 
@@ -16,6 +17,7 @@ public partial class ImportExportWindow : Window
     public ImportExportWindow(MainViewModel main)
     {
         InitializeComponent();
+        Icon = WindowIcons.Create(WindowIcons.ImportExport);
         _main = main;
 
         CmdSite.Items.Add("(Deduire du nom du fichier)");

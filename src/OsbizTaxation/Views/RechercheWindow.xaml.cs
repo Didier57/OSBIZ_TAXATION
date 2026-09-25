@@ -22,6 +22,7 @@ public partial class RechercheWindow : Window
     public RechercheWindow(MainViewModel main)
     {
         InitializeComponent();
+        Icon = WindowIcons.Create(WindowIcons.Search);
         _main = main;
 
         CmdPeriode.SelectedIndex = 0;

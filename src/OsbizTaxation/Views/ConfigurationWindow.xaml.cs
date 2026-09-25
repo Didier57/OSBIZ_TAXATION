@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using OsbizTaxation.Helpers;
 using OsbizTaxation.Models;
 using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
@@ -14,6 +15,7 @@ public partial class ConfigurationWindow : Window
     public ConfigurationWindow(MainViewModel main)
     {
         InitializeComponent();
+        Icon = WindowIcons.Create(WindowIcons.Gear);
         _main = main;
         _viewModel = new ConfigViewModel(main.Config);
         DataContext = _viewModel;

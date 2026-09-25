@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using OsbizTaxation.Helpers;
 using OsbizTaxation.ViewModels;
 using OsbizTaxation.Views;
 
@@ -11,6 +12,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Icon = WindowIcons.Create(WindowIcons.Headset);
         DataContext = _viewModel;
         Loaded += OnLoaded;
         Closed += OnClosed;

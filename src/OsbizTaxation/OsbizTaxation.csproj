@@ -15,6 +15,8 @@
     <InformationalVersion>1.0.0</InformationalVersion>
     <Product>OSBIZ TAXATION</Product>
     <Company>Didier57</Company>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+
 
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>

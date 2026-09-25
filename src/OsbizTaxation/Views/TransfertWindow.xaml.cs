@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
+using OsbizTaxation.Helpers;
 using OsbizTaxation.ViewModels;
 
 namespace OsbizTaxation.Views;
@@ -13,6 +14,7 @@ public partial class TransfertWindow : Window
     public TransfertWindow(MainViewModel main)
     {
         InitializeComponent();
+        Icon = WindowIcons.Create(WindowIcons.Download);
         _main = main;
 
         foreach (var site in main.Config.Sites)
