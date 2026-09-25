@@ -35,6 +35,7 @@ public partial class StatistiquesWindow : Window
             CmdSite.Items.Add(site.Nom);
             CmdSiteHeure.Items.Add(site.Nom);
             CmdTopSite.Items.Add(site.Nom);
+            CmdPaysSite.Items.Add(site.Nom);
         }
 
         if (CmdSite.Items.Count > 0)
@@ -43,6 +44,8 @@ public partial class StatistiquesWindow : Window
             CmdSiteHeure.SelectedIndex = 0;
         if (CmdTopSite.Items.Count > 0)
             CmdTopSite.SelectedIndex = 0;
+        if (CmdPaysSite.Items.Count > 0)
+            CmdPaysSite.SelectedIndex = 0;
 
         PopulateYears(today.Year);
 
@@ -59,10 +62,15 @@ public partial class StatistiquesWindow : Window
         CmdTopNombre.SelectedIndex = 0;
         DpTopDate.SelectedDate = today;
 
+        CmdPaysPeriode.SelectedIndex = 1;
+        CmdPaysType.SelectedIndex = 0;
+        DpPaysDate.SelectedDate = today;
+
         _initialise = false;
         Refresh();
         RefreshHeure();
         RefreshTop();
+        RefreshPays();
     }
 
     private void PopulateYears(int defaultYear)
@@ -308,6 +316,87 @@ public partial class StatistiquesWindow : Window
         GridTop.ItemsSource = table;
         TopChart.Items = slices;
         TopChart.Title = rows.Count > 0 ? $"TOP {rows.Count} Durée" : "TOP Durée";
+    }
+
+    private string PaysPeriode
+        => (CmdPaysPeriode.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Mois";
+
+    private void OnPaysFilterChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshPays();
+    }
+
+    private void OnPaysDateChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshPays();
+    }
+
+    private void OnPaysPrecClick(object sender, RoutedEventArgs e) => ShiftPays(-1);
+
+    private void OnPaysSuivClick(object sender, RoutedEventArgs e) => ShiftPays(1);
+
+    private void OnPaysAujourdhuiClick(object sender, RoutedEventArgs e)
+    {
+        DpPaysDate.SelectedDate = DateTime.Today;
+        RefreshPays();
+    }
+
+    private void ShiftPays(int sens)
+    {
+        var date = DpPaysDate.SelectedDate ?? DateTime.Today;
+        date = PaysPeriode switch
+        {
+            "Mois" => date.AddMonths(sens),
+            "Année" => date.AddYears(sens),
+            _ => date.AddDays(sens)
+        };
+        DpPaysDate.SelectedDate = date;
+        RefreshPays();
+    }
+
+    private (string Debut, string Fin) GetPaysPlage()
+    {
+        var date = DpPaysDate.SelectedDate ?? DateTime.Today;
+        switch (PaysPeriode)
+        {
+            case "Mois":
+                var premier = new DateTime(date.Year, date.Month, 1);
+                return (Iso(premier), Iso(premier.AddMonths(1).AddDays(-1)));
+            case "Année":
+                return (Iso(new DateTime(date.Year, 1, 1)), Iso(new DateTime(date.Year, 12, 31)));
+            default:
+                return (Iso(date), Iso(date));
+        }
+    }
+
+    private void RefreshPays()
+    {
+        if (CmdPaysSite.SelectedItem is not string site || string.IsNullOrWhiteSpace(site))
+        {
+            ChartPays.Items = Array.Empty<BarItem>();
+            return;
+        }
+
+        var (debut, fin) = GetPaysPlage();
+        bool? entrant = (CmdPaysType.SelectedItem as ComboBoxItem)?.Content?.ToString() switch
+        {
+            "Sortant" => false,
+            "Entrant/Sortant" => null,
+            _ => true,
+        };
+
+        var rows = _main.Repository.CountByCountry(site, debut, fin, entrant);
+
+        var items = new List<BarItem>(rows.Count);
+        foreach (var r in rows)
+            items.Add(new BarItem(string.IsNullOrWhiteSpace(r.Pays) ? "(Local)" : r.Pays, r.Total));
+
+        ChartPays.Items = items;
+        ChartPays.Title = "Appel par pays";
     }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();

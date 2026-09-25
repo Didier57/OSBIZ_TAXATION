@@ -22,4 +22,9 @@
     <SolidColorBrush x:Key="Brush.Filter.Active" Color="#FF4DA3FF" />
     <SolidColorBrush x:Key="Brush.Input.Background" Color="#FF252526" />
 
+    <!-- Onglets : fond/texte de l'onglet selectionne et texte des onglets non selectionnes. -->
+    <SolidColorBrush x:Key="Brush.Tab.Selected.Background" Color="#FF3E3E42" />
+    <SolidColorBrush x:Key="Brush.Tab.Selected.Foreground" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.Tab.Foreground" Color="#FFB0B0B0" />
+
 </ResourceDictionary>

@@ -519,6 +519,39 @@ LIMIT $top;";
         return list;
     }
 
+    /// <summary>Nombre d'appels par pays sur une periode, pour un type (entrant/sortant/les deux).</summary>
+    public List<CountryCount> CountByCountry(string site, string dateIsoDebut, string dateIsoFin, bool? entrant)
+    {
+        var list = new List<CountryCount>();
+        var condition = entrant switch
+        {
+            true => "\n  AND (InfoCode % 10) IN (1, 3, 5, 7)",
+            false => "\n  AND (InfoCode % 10) IN (2, 4, 6, 8, 9, 0)",
+            null => "",
+        };
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = $@"
+SELECT Pays, COUNT(*) AS Total
+FROM Cdr
+WHERE Site = $site AND DateIso >= $debut AND DateIso <= $fin{condition}
+GROUP BY Pays
+ORDER BY Total DESC, Pays;";
+        cmd.Parameters.AddWithValue("$site", site);
+        cmd.Parameters.AddWithValue("$debut", dateIsoDebut);
+        cmd.Parameters.AddWithValue("$fin", dateIsoFin);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var pays = reader.IsDBNull(0) ? "" : reader.GetString(0);
+            int total = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+            list.Add(new CountryCount(pays, total));
+        }
+
+        return list;
+    }
+
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,

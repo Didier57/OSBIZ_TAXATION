@@ -136,7 +136,36 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Pays">
-                <TextBlock Text="&#192; venir" Margin="12" />
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <TextBlock Text="P&#233;riode" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox x:Name="CmdPaysPeriode" Width="90" SelectionChanged="OnPaysFilterChanged">
+                            <ComboBoxItem Content="Jour" />
+                            <ComboBoxItem Content="Mois" />
+                            <ComboBoxItem Content="Ann&#233;e" />
+                        </ComboBox>
+                        <Button x:Name="BtnPaysPrec" Content="&#x25C4;" Width="34" Margin="10,0,0,0" Click="OnPaysPrecClick" ToolTip="P&#233;riode pr&#233;c&#233;dente" />
+                        <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,6,0" />
+                        <DatePicker x:Name="DpPaysDate" Width="140" SelectedDateChanged="OnPaysDateChanged" />
+                        <Button x:Name="BtnPaysSuiv" Content="&#x25BA;" Width="34" Margin="6,0,0,0" Click="OnPaysSuivClick" ToolTip="P&#233;riode suivante" />
+                        <Button x:Name="BtnPaysAujourdhui" Content="Aujourd'hui" Margin="6,0,0,0" Click="OnPaysAujourdhuiClick" ToolTip="Revenir &#224; la p&#233;riode actuelle" />
+                        <TextBlock Text="Site" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <ComboBox x:Name="CmdPaysSite" Width="150" SelectionChanged="OnPaysFilterChanged" />
+                        <TextBlock Text="Type" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <ComboBox x:Name="CmdPaysType" Width="130" SelectionChanged="OnPaysFilterChanged">
+                            <ComboBoxItem Content="Entrant" />
+                            <ComboBoxItem Content="Sortant" />
+                            <ComboBoxItem Content="Entrant/Sortant" />
+                        </ComboBox>
+                    </StackPanel>
+
+                    <helpers:BarChart x:Name="ChartPays" Grid.Row="1" Margin="0,12,0,0" />
+                </Grid>
             </TabItem>
             <TabItem Header="TCD">
                 <TextBlock Text="&#192; venir" Margin="12" />
