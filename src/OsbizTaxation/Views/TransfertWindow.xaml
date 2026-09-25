@@ -42,9 +42,16 @@
         </StackPanel>
 
         <GroupBox Grid.Row="3" Header="Journal">
-            <ListBox ItemsSource="{Binding Logs}"
+            <TextBox x:Name="TxtJournal"
+                     IsReadOnly="True"
+                     IsUndoEnabled="False"
                      FontFamily="Consolas" FontSize="12"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+                     TextWrapping="NoWrap"
+                     AcceptsReturn="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     HorizontalScrollBarVisibility="Auto"
+                     VerticalScrollBarVisibility="Auto" />
         </GroupBox>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">

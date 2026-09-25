@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Windows;
 using OsbizTaxation.ViewModels;
 
@@ -7,6 +8,7 @@ namespace OsbizTaxation.Views;
 public partial class TransfertWindow : Window
 {
     private readonly MainViewModel _main;
+    private readonly StringBuilder _journal = new();
 
     public TransfertWindow(MainViewModel main)
     {
@@ -20,8 +22,6 @@ public partial class TransfertWindow : Window
     }
 
     public ObservableCollection<SiteSelectionItem> Sites { get; } = new();
-
-    public ObservableCollection<string> Logs { get; } = new();
 
     private void OnToutSelectionnerClick(object sender, RoutedEventArgs e) => SetAll(true);
 
@@ -64,5 +64,8 @@ public partial class TransfertWindow : Window
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();
 
     private void Log(string message)
-        => Logs.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
+    {
+        _journal.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
+        TxtJournal.Text = _journal.ToString();
+    }
 }

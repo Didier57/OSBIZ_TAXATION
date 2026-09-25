@@ -33,9 +33,18 @@ public sealed class OpenScapeClient : IDisposable
     public async Task DeleteAsync(SiteConfig site, CancellationToken ct = default)
     {
         var url = BuildUrl(site, "delete");
+
+        // Le portlet OSBiz traite la suppression via GET (comme le telechargement).
+        using (var getResponse = await _http.GetAsync(url, ct).ConfigureAwait(false))
+        {
+            if (getResponse.IsSuccessStatusCode)
+                return;
+        }
+
+        // Repli sur POST si le GET n'est pas accepte.
         using var content = new StringContent(string.Empty);
-        using var response = await _http.PostAsync(url, content, ct).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+        using var postResponse = await _http.PostAsync(url, content, ct).ConfigureAwait(false);
+        postResponse.EnsureSuccessStatusCode();
     }
 
     internal static string BuildUrl(SiteConfig site, string action)

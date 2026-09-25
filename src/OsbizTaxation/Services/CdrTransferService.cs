@@ -46,9 +46,16 @@ public sealed class CdrTransferService
         var supprime = false;
         if (site.SupprimerApresTransfert)
         {
-            await _client.DeleteAsync(site, ct).ConfigureAwait(false);
-            supprime = true;
-            log.Report($"[{site.Nom}] Fichier supprime sur le PBX (DELETE).");
+            try
+            {
+                await _client.DeleteAsync(site, ct).ConfigureAwait(false);
+                supprime = true;
+                log.Report($"[{site.Nom}] Fichier supprime sur le PBX (DELETE).");
+            }
+            catch (Exception ex)
+            {
+                log.Report($"[{site.Nom}] Import reussi mais suppression du fichier impossible : {ex.Message}");
+            }
         }
 
         return new SiteTransferResult(site.Nom, inserted, rawPath, supprime);
