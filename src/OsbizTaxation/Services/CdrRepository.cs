@@ -60,6 +60,7 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         MigrateInfoLabels();
         RebuildGroups();
         RecomputeCountries();
+        BackfillTaxesAndAccountCode();
     }
 
     /// <summary>
@@ -116,6 +117,50 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
 UPDATE Cdr SET Information = 'Entrant Transféré' WHERE Information = 'Entrant route';
 UPDATE Cdr SET Information = 'Sortant Transféré' WHERE Information = 'Sortant route';";
         cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Reconstruit les champs Taxes (champ 8) et Account Code (champ 10)
+    /// des enregistrements deja stockes, a partir de la ligne brute conservee.
+    /// </summary>
+    private void BackfillTaxesAndAccountCode()
+    {
+        using var tx = _connection.BeginTransaction();
+
+        var updates = new List<(long Id, string Taxes, string AccountCode)>();
+        using (var select = _connection.CreateCommand())
+        {
+            select.Transaction = tx;
+            select.CommandText = @"
+SELECT Id, RawLine FROM Cdr
+WHERE RawLine IS NOT NULL AND RawLine <> ''
+  AND (Taxes IS NULL OR Taxes = '' OR AccountCode IS NULL OR AccountCode = '');";
+            using var reader = select.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetInt64(0);
+                var raw = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                var fields = raw.Split('|');
+                var taxes = fields.Length > 7 ? fields[7].Trim() : string.Empty;
+                var accountCode = fields.Length > 9 ? fields[9].Trim() : string.Empty;
+                if (taxes.Length == 0 && accountCode.Length == 0)
+                    continue;
+                updates.Add((id, taxes, accountCode));
+            }
+        }
+
+        foreach (var (id, taxes, accountCode) in updates)
+        {
+            using var update = _connection.CreateCommand();
+            update.Transaction = tx;
+            update.CommandText = "UPDATE Cdr SET Taxes = $t, AccountCode = $a WHERE Id = $id;";
+            update.Parameters.AddWithValue("$t", taxes);
+            update.Parameters.AddWithValue("$a", accountCode);
+            update.Parameters.AddWithValue("$id", id);
+            update.ExecuteNonQuery();
+        }
+
+        tx.Commit();
     }
 
     /// <summary>
