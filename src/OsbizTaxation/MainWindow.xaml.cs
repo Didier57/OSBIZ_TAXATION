@@ -15,6 +15,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.Headset);
         DataContext = _viewModel;
+        Title = $"Taxation OSBIZ  ({_viewModel.Version})";
         UpdateThemeUi();
         Loaded += OnLoaded;
         Closed += OnClosed;
