@@ -26,4 +26,7 @@ public sealed class AppConfig
 
     /// <summary>Colonnes masquees, par nom de table.</summary>
     public Dictionary<string, List<string>> HiddenColumns { get; set; } = new();
+
+    /// <summary>Parametres du serveur d'envoi d'emails (SMTP).</summary>
+    public EmailConfig Email { get; set; } = new();
 }

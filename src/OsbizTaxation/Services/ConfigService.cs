@@ -25,6 +25,9 @@ public static class ConfigService
             foreach (var site in config.Sites)
                 site.MotDePasse = SecretProtector.Unprotect(site.MotDePasse);
 
+            config.Email ??= new EmailConfig();
+            config.Email.MotDePasse = SecretProtector.Unprotect(config.Email.MotDePasse);
+
             return config;
         }
         catch (Exception ex)
@@ -70,7 +73,17 @@ public static class ConfigService
                     NumFin = l.NumFin,
                     Site = l.Site,
                     NomLigne = l.NomLigne
-                }).ToList()
+                }).ToList(),
+                Email = new EmailConfig
+                {
+                    Hote = config.Email?.Hote ?? string.Empty,
+                    Port = config.Email?.Port ?? 587,
+                    UseSsl = config.Email?.UseSsl ?? true,
+                    Login = config.Email?.Login ?? string.Empty,
+                    MotDePasse = SecretProtector.Protect(config.Email?.MotDePasse ?? string.Empty),
+                    Expediteur = config.Email?.Expediteur ?? string.Empty,
+                    NomAffiche = config.Email?.NomAffiche ?? string.Empty
+                }
             };
 
             Directory.CreateDirectory(AppPaths.AppDirectory);

@@ -126,6 +126,13 @@ public partial class ConfigurationWindow : Window
             return;
         }
 
+        if (!string.IsNullOrWhiteSpace(config.Email.Hote)
+            && string.IsNullOrWhiteSpace(config.Email.Expediteur))
+        {
+            Warn("Renseignez l'adresse de l'expediteur pour le serveur email.");
+            return;
+        }
+
         if (!ConfigService.Save(config))
         {
             Warn("Erreur d'enregistrement : " + ConfigService.LastError);
@@ -135,6 +142,42 @@ public partial class ConfigurationWindow : Window
         _main.ApplyConfig(config);
         MessageBox.Show("Configuration enregistree.", "Configuration",
             MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private async void OnEnvoyerTestEmailClick(object sender, RoutedEventArgs e)
+    {
+        var destinataire = TxtEmailTest.Text?.Trim() ?? string.Empty;
+        if (destinataire.Length == 0 || !destinataire.Contains('@')
+            || destinataire.StartsWith('@') || destinataire.EndsWith('@'))
+        {
+            Warn("Entrez une adresse email de test valide.");
+            return;
+        }
+
+        var email = _viewModel.ToEmailConfig();
+        if (string.IsNullOrWhiteSpace(email.Hote) || string.IsNullOrWhiteSpace(email.Expediteur))
+        {
+            Warn("Renseignez l'hote SMTP et l'adresse de l'expediteur avant de tester.");
+            return;
+        }
+
+        BtnTestEmail.IsEnabled = false;
+        try
+        {
+            await EmailService.EnvoyerAsync(email, destinataire,
+                "Test Taxation OSBIZ",
+                "Ceci est un email de test envoye depuis la configuration de Taxation OSBIZ.");
+            MessageBox.Show($"Email de test envoye a {destinataire}.", "Email",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Warn("Echec de l'envoi : " + ex.Message);
+        }
+        finally
+        {
+            BtnTestEmail.IsEnabled = true;
+        }
     }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();

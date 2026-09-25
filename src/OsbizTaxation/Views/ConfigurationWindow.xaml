@@ -103,6 +103,63 @@
                     </StackPanel>
                 </StackPanel>
             </TabItem>
+
+            <TabItem Header="Email">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" MinWidth="240" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="H&#244;te SMTP" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Padding="4" Margin="0,6"
+                             Text="{Binding EmailHote, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Port" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Padding="4" Margin="0,6" Width="90"
+                             HorizontalAlignment="Left"
+                             Text="{Binding EmailPort, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <CheckBox Grid.Row="2" Grid.Column="1" Content="SSL / TLS" Margin="0,6"
+                              IsChecked="{Binding EmailSsl}" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Login" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Padding="4" Margin="0,6"
+                             Text="{Binding EmailLogin, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Mot de passe" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Padding="4" Margin="0,6"
+                             Text="{Binding EmailMotDePasse, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Exp&#233;diteur (Email)" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Padding="4" Margin="0,6"
+                             Text="{Binding EmailExpediteur, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Nom affich&#233; chez le destinataire" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <TextBox Grid.Row="6" Grid.Column="1" Padding="4" Margin="0,6"
+                             Text="{Binding EmailNomAffiche, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <Separator Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Test : email du destinataire" VerticalAlignment="Center" Margin="0,6,12,6" />
+                    <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" Margin="0,6">
+                        <TextBox x:Name="TxtEmailTest" Width="260" Padding="4" Margin="0,0,8,0" />
+                        <Button x:Name="BtnTestEmail" Content="Envoyer un test" Padding="14,4"
+                                Click="OnEnvoyerTestEmailClick" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
         </TabControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
