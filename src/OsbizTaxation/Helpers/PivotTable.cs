@@ -16,6 +16,7 @@ public sealed class PivotTable : UserControl
     private List<PivotCall> _data = new();
     private string _year = "";
     private Brush _cellBorder = Brushes.Gray;
+    private bool _collapseAllMonths;
 
     public PivotTable()
     {
@@ -34,6 +35,7 @@ public sealed class PivotTable : UserControl
         _year = year ?? "";
         _collapsedMonths.Clear();
         _collapsedSites.Clear();
+        _collapseAllMonths = true;
         Build();
     }
 
@@ -141,6 +143,14 @@ public sealed class PivotTable : UserControl
             _grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             AddCell("Aucune donnée", 0, 0, 1, 1, fg, null, false, TextAlignment.Center);
             return;
+        }
+
+        if (_collapseAllMonths)
+        {
+            _collapsedMonths.Clear();
+            foreach (var m in d.Months)
+                _collapsedMonths.Add(m);
+            _collapseAllMonths = false;
         }
 
         var leaves = new List<(int Month, DateTime? Day)>();

@@ -53,7 +53,7 @@ public partial class StatistiquesWindow : Window
         if (CmdPaysSite.Items.Count > 0)
             CmdPaysSite.SelectedIndex = 0;
         if (CmdTcdSite.Items.Count > 0)
-            CmdTcdSite.SelectedIndex = 0;
+            CmdTcdSite.SelectedIndex = CmdTcdSite.Items.Count > 1 ? 1 : 0;
 
         PopulateYears(today.Year);
 
