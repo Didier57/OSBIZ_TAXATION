@@ -41,6 +41,17 @@ public sealed class GroupBrushConverter : IValueConverter
         return Palette[((groupe - 1) % (Palette.Length - 1)) + 1];
     }
 
+    /// <summary>Couleur RGB (6 chiffres hexa) du fond pour un groupe, ou null si aucun groupe.</summary>
+    public static string? HexFor(int groupe)
+    {
+        if (groupe <= 0)
+            return null;
+        var brush = Palette[((groupe - 1) % (Palette.Length - 1)) + 1];
+        return brush is SolidColorBrush solid
+            ? $"{solid.Color.R:X2}{solid.Color.G:X2}{solid.Color.B:X2}"
+            : null;
+    }
+
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => Binding.DoNothing;
 }

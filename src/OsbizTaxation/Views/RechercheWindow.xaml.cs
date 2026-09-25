@@ -1,9 +1,14 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using Microsoft.Win32;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.Models;
+using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
 
 namespace OsbizTaxation.Views;
@@ -112,6 +117,81 @@ public partial class RechercheWindow : Window
     }
 
     private void OnSupprimerFiltresClick(object sender, RoutedEventArgs e) => ExcelFilter.Clear(GridResultats);
+
+    private void OnExportExcelClick(object sender, RoutedEventArgs e)
+    {
+        var columns = GridResultats.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();
+        if (columns.Count == 0)
+        {
+            MessageBox.Show(this, "Aucune colonne à exporter.", "Export Excel", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var paths = columns.Select(ExcelFilter.GetColumnPath).ToList();
+        var headers = columns.Select(ExcelFilter.GetColumnTitle).ToList();
+
+        var view = CollectionViewSource.GetDefaultView(GridResultats.ItemsSource);
+        var rows = new List<(string[], string?)>();
+        foreach (var item in view)
+        {
+            var cells = paths.Select(p => ExcelFilter.GetCellValue(item, p)).ToArray();
+            var fill = item is CdrRecord record ? GroupBrushConverter.HexFor(record.Groupe) : null;
+            rows.Add((cells, fill));
+        }
+
+        if (rows.Count == 0)
+        {
+            MessageBox.Show(this, "Aucune ligne à exporter.", "Export Excel", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var site = CmdSite.SelectedItem as string ?? "Site";
+        var dialog = new SaveFileDialog
+        {
+            Filter = "Classeur Excel (*.xlsx)|*.xlsx",
+            DefaultExt = ".xlsx",
+            FileName = $"Recherche_{Sanitize(site)}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx"
+        };
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        try
+        {
+            ExcelExporter.Export(dialog.FileName, headers, rows, "Recherche");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "Erreur lors de l'export :\n" + ex.Message,
+                "Export Excel", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var ouvrir = MessageBox.Show(this,
+            $"{rows.Count} ligne(s) exportée(s) vers :\n{dialog.FileName}\n\nVoulez-vous ouvrir le fichier ?",
+            "Export Excel", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        if (ouvrir == MessageBoxResult.Yes)
+            OuvrirFichier(dialog.FileName);
+    }
+
+    private void OuvrirFichier(string filePath)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, "Impossible d'ouvrir le fichier :\n" + ex.Message,
+                "Export Excel", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private static string Sanitize(string value)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        var chars = value.Select(c => invalid.Contains(c) ? '_' : c).ToArray();
+        return new string(chars);
+    }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();
 }

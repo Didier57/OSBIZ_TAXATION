@@ -210,6 +210,7 @@ public static class ExcelFilter
         var title = column.Header?.ToString() ?? string.Empty;
 
         var panel = new Grid();
+        panel.Tag = title;
         panel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         panel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
@@ -689,4 +690,14 @@ public static class ExcelFilter
             return path;
         return column.SortMemberPath ?? string.Empty;
     }
+
+    /// <summary>Titre d'origine d'une colonne (l'entete a ete remplace par un panneau avec le bouton de filtre).</summary>
+    public static string GetColumnTitle(DataGridColumn column) =>
+        (column.Header as FrameworkElement)?.Tag as string ?? column.Header?.ToString() ?? string.Empty;
+
+    /// <summary>Chemin de liaison d'une colonne (utile pour exporter les valeurs affichees).</summary>
+    public static string GetColumnPath(DataGridColumn column) => GetPath(column);
+
+    /// <summary>Valeur texte d'une cellule pour un element et un chemin donnes.</summary>
+    public static string GetCellValue(object? item, string path) => GetValue(item, path) ?? string.Empty;
 }
