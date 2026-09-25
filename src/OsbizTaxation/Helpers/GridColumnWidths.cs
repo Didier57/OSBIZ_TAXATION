@@ -37,7 +37,7 @@ public static class GridColumnWidths
         }
     }
 
-    private static string Key(DataGridColumn column)
+    public static string Key(DataGridColumn column)
     {
         if (column is DataGridBoundColumn bound &&
             bound.Binding is Binding binding &&

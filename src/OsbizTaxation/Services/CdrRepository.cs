@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using System.Globalization;
 using OsbizTaxation.Models;
 
 namespace OsbizTaxation.Services;
@@ -286,6 +287,22 @@ VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne
     {
         using var cmd = _connection.CreateCommand();
         cmd.CommandText = SelectColumns + " ORDER BY DateIso DESC, HeureFin DESC, Id DESC;";
+        return Read(cmd);
+    }
+
+    /// <summary>Retourne les appels des <paramref name="days"/> derniers jours (aujourd'hui inclus).</summary>
+    public List<CdrRecord> GetRecent(int days)
+    {
+        if (days < 1)
+            days = 1;
+
+        var cutoff = DateTime.Today.AddDays(-(days - 1))
+            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = SelectColumns +
+            " WHERE DateIso >= $debut ORDER BY DateIso DESC, HeureFin DESC, Id DESC;";
+        cmd.Parameters.AddWithValue("$debut", cutoff);
         return Read(cmd);
     }
 

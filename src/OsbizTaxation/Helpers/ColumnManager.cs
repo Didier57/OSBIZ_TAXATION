@@ -20,6 +20,7 @@ public static class ColumnManager
 
         public DataGridColumn Column { get; init; } = null!;
         public string Title { get; init; } = string.Empty;
+        public Action? Changed { get; init; }
 
         public bool IsVisible
         {
@@ -31,13 +32,14 @@ public static class ColumnManager
                 _isVisible = value;
                 Column.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsVisible)));
+                Changed?.Invoke();
             }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 
-    public static void Show(DataGrid grid, UIElement target)
+    public static void Show(DataGrid grid, UIElement target, Action? onChanged = null)
     {
         if (Open.TryGetValue(grid, out var existing))
         {
@@ -53,7 +55,8 @@ public static class ColumnManager
             {
                 Column = column,
                 Title = ExcelFilter.GetColumnTitle(column),
-                IsVisible = column.Visibility == Visibility.Visible
+                IsVisible = column.Visibility == Visibility.Visible,
+                Changed = onChanged
             });
         }
 
@@ -180,6 +183,7 @@ public static class ColumnManager
                 return;
             items.Move(from, to);
             ApplyOrder(items);
+            onChanged?.Invoke();
             e.Handled = true;
         };
 
@@ -191,6 +195,51 @@ public static class ColumnManager
 
         Open[grid] = popup;
         popup.IsOpen = true;
+    }
+
+    /// <summary>Restaure l'ordre et les colonnes masquees memorises pour une table.</summary>
+    public static void ApplyLayout(DataGrid grid, List<string>? order, List<string>? hidden)
+    {
+        if (hidden is { Count: > 0 })
+        {
+            foreach (var column in grid.Columns)
+                column.Visibility = hidden.Contains(GridColumnWidths.Key(column))
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+        }
+
+        if (order is { Count: > 0 })
+        {
+            var desired = order
+                .Select(key => grid.Columns.FirstOrDefault(c => GridColumnWidths.Key(c) == key))
+                .Where(c => c != null)
+                .Cast<DataGridColumn>()
+                .ToList();
+
+            foreach (var column in grid.Columns.OrderBy(c => c.DisplayIndex))
+            {
+                if (!desired.Contains(column))
+                    desired.Add(column);
+            }
+
+            for (var i = 0; i < desired.Count; i++)
+                desired[i].DisplayIndex = i;
+        }
+    }
+
+    /// <summary>Memorise l'ordre et les colonnes masquees d'une table.</summary>
+    public static void Capture(DataGrid grid, List<string> order, List<string> hidden)
+    {
+        order.Clear();
+        foreach (var column in grid.Columns.OrderBy(c => c.DisplayIndex))
+            order.Add(GridColumnWidths.Key(column));
+
+        hidden.Clear();
+        foreach (var column in grid.Columns)
+        {
+            if (column.Visibility != Visibility.Visible)
+                hidden.Add(GridColumnWidths.Key(column));
+        }
     }
 
     private static void ApplyOrder(IList<ColumnItem> items)

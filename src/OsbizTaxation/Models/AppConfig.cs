@@ -20,4 +20,10 @@ public sealed class AppConfig
 
     /// <summary>Largeur memorisee des colonnes, par nom de table puis par nom de colonne.</summary>
     public Dictionary<string, Dictionary<string, double>> ColumnWidths { get; set; } = new();
+
+    /// <summary>Ordre memorise des colonnes, par nom de table.</summary>
+    public Dictionary<string, List<string>> ColumnOrders { get; set; } = new();
+
+    /// <summary>Colonnes masquees, par nom de table.</summary>
+    public Dictionary<string, List<string>> HiddenColumns { get; set; } = new();
 }

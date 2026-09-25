@@ -49,6 +49,12 @@ public static class ConfigService
                 ColumnWidths = config.ColumnWidths.ToDictionary(
                     pair => pair.Key,
                     pair => new Dictionary<string, double>(pair.Value)),
+                ColumnOrders = config.ColumnOrders.ToDictionary(
+                    pair => pair.Key,
+                    pair => new List<string>(pair.Value)),
+                HiddenColumns = config.HiddenColumns.ToDictionary(
+                    pair => pair.Key,
+                    pair => new List<string>(pair.Value)),
                 Sites = config.Sites.Select(s => new SiteConfig
                 {
                     Nom = s.Nom,

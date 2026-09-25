@@ -69,6 +69,7 @@
                   HeadersVisibility="Column"
                   SelectionMode="Extended"
                   SelectionUnit="FullRow"
+                  CanUserSortColumns="False"
                   GridLinesVisibility="All"
                   EnableRowVirtualization="True"
                   FrozenColumnCount="1">

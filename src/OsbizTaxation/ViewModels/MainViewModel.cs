@@ -12,6 +12,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly CdrTransferService _transferService = new();
     private readonly DispatcherTimer _autoTimer = new();
 
+    private const int RecentDays = 31;
+
     private string _status = "Pret.";
     private string _lastTransfer = "Jamais";
     private bool _isBusy;
@@ -68,10 +70,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public void ReloadRecords()
     {
         Records.Clear();
-        foreach (var record in Repository.GetAll())
+        foreach (var record in Repository.GetRecent(RecentDays))
             Records.Add(record);
 
-        Status = $"{Records.Count} appel(s) en base.";
+        Status = $"{Records.Count} appel(s) — {RecentDays} derniers jours.";
     }
 
     public async Task<int> TransferSitesAsync(

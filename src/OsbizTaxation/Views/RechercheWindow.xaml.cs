@@ -5,6 +5,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.Models;
@@ -37,7 +39,9 @@ public partial class RechercheWindow : Window
         GridResultats.ItemsSource = Resultats;
         ExcelFilter.Attach(GridResultats);
         GridColumnWidths.Apply(GridResultats, WidthsFor("GridResultats"));
-        Closed += (_, _) => SaveColumnWidths();
+        ColumnManager.ApplyLayout(GridResultats, OrdersFor("GridResultats"), HiddenFor("GridResultats"));
+        GridResultats.PreviewMouseRightButtonUp += OnGridRightClickCopy;
+        Closed += (_, _) => SaveTableState();
 
         _initialise = false;
         RunSearch();
@@ -123,7 +127,54 @@ public partial class RechercheWindow : Window
     private void OnSupprimerFiltresClick(object sender, RoutedEventArgs e) => ExcelFilter.Clear(GridResultats);
 
     private void OnColonnesClick(object sender, RoutedEventArgs e) =>
-        ColumnManager.Show(GridResultats, (UIElement)sender);
+        ColumnManager.Show(GridResultats, (UIElement)sender, SaveTableState);
+
+    private void OnGridRightClickCopy(object sender, MouseButtonEventArgs e)
+    {
+        if (e.Handled)
+            return;
+
+        var cell = FindCell(e.OriginalSource as DependencyObject);
+        if (cell is null)
+            return;
+
+        e.Handled = true;
+
+        var copier = new MenuItem { Header = "Copier la cellule" };
+        copier.Click += (_, _) => CopierCellule(cell);
+
+        var menu = new ContextMenu { PlacementTarget = cell };
+        menu.Items.Add(copier);
+        menu.IsOpen = true;
+    }
+
+    private static void CopierCellule(DataGridCell cell)
+    {
+        var path = ExcelFilter.GetColumnPath(cell.Column);
+        var text = ExcelFilter.GetCellValue(cell.DataContext, path);
+        try
+        {
+            Clipboard.SetText(text);
+        }
+        catch
+        {
+            // Presse-papiers indisponible : on ignore.
+        }
+    }
+
+    private static DataGridCell? FindCell(DependencyObject? source)
+    {
+        while (source != null)
+        {
+            if (source is DataGridCell cell)
+                return cell;
+            source = source is Visual
+                ? VisualTreeHelper.GetParent(source)
+                : LogicalTreeHelper.GetParent(source);
+        }
+
+        return null;
+    }
 
     private void OnExportExcelClick(object sender, RoutedEventArgs e)
     {
@@ -202,9 +253,10 @@ public partial class RechercheWindow : Window
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();
 
-    private void SaveColumnWidths()
+    private void SaveTableState()
     {
         GridColumnWidths.Capture(GridResultats, WidthsFor("GridResultats"));
+        ColumnManager.Capture(GridResultats, OrdersFor("GridResultats"), HiddenFor("GridResultats"));
         ConfigService.Save(_main.Config);
     }
 
@@ -217,5 +269,27 @@ public partial class RechercheWindow : Window
         }
 
         return widths;
+    }
+
+    private List<string> OrdersFor(string grid)
+    {
+        if (!_main.Config.ColumnOrders.TryGetValue(grid, out var order))
+        {
+            order = new List<string>();
+            _main.Config.ColumnOrders[grid] = order;
+        }
+
+        return order;
+    }
+
+    private List<string> HiddenFor(string grid)
+    {
+        if (!_main.Config.HiddenColumns.TryGetValue(grid, out var hidden))
+        {
+            hidden = new List<string>();
+            _main.Config.HiddenColumns[grid] = hidden;
+        }
+
+        return hidden;
     }
 }
