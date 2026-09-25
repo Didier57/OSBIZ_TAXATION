@@ -17,6 +17,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        AppIcon.SetAppUserModelId("Didier57.OsbizTaxation");
+
         _activateEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ActivateEventName);
 
         _instanceMutex = new Mutex(true, InstanceMutexName, out bool createdNew);

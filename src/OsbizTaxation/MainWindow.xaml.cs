@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
@@ -9,6 +11,13 @@ namespace OsbizTaxation;
 
 public partial class MainWindow : Window
 {
+    private const int WmSetIcon = 0x0080;
+    private const int IconSmall = 0;
+    private const int IconBig = 1;
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
     private readonly MainViewModel _viewModel = new();
     private readonly TrayIcon _tray = new();
     private System.Drawing.Icon? _trayIcon;
@@ -25,10 +34,41 @@ public partial class MainWindow : Window
         Title = $"Taxation OSBIZ  ({_viewModel.Version})";
         UpdateThemeUi();
         GridColumnWidths.Apply(GridCdr, WidthsFor("GridCdr"));
-        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
+        SourceInitialized += OnSourceInitialized;
         Loaded += OnLoaded;
         StateChanged += OnStateChanged;
         Closed += OnClosed;
+    }
+
+    // ---------------------------------------------------------------------
+    // Icone de la fenetre / barre des taches
+    // ---------------------------------------------------------------------
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+        TitleBarTheme.Apply(this);
+        ApplyTaskbarIcon();
+    }
+
+    /// <summary>Force explicitement l'icone de la barre des taches a partir de l'icone de l'exe.</summary>
+    private void ApplyTaskbarIcon()
+    {
+        if (_trayIcon is null)
+            return;
+
+        try
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero)
+                return;
+
+            SendMessage(hwnd, WmSetIcon, IconSmall, _trayIcon.Handle);
+            SendMessage(hwnd, WmSetIcon, IconBig, _trayIcon.Handle);
+        }
+        catch (Exception ex)
+        {
+            AppLog.WriteException("Icone de la barre des taches", ex);
+        }
     }
 
     // ---------------------------------------------------------------------
