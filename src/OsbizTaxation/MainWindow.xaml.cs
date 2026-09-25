@@ -53,9 +53,9 @@ public partial class MainWindow : Window
 
     private void OnImportExportClick(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show(
-            "Le module d'import/export sera disponible dans une prochaine version.",
-            "Import/Export", MessageBoxButton.OK, MessageBoxImage.Information);
+        var window = new ImportExportWindow(_viewModel) { Owner = this };
+        window.ShowDialog();
+        _viewModel.ReloadRecords();
     }
 
     private void OnAboutClick(object sender, RoutedEventArgs e)

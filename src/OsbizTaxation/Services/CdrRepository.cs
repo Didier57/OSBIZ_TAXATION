@@ -48,6 +48,33 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         cmd.ExecuteNonQuery();
 
         EnsureColumn("Pays", "TEXT");
+        DeduplicateRawLines();
+        CreateUniqueRawIndex();
+    }
+
+    /// <summary>Supprime les doublons deja presents (meme site + meme ligne brute).</summary>
+    public int DeduplicateRawLines()
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+DELETE FROM Cdr
+WHERE RawLine IS NOT NULL AND RawLine <> ''
+  AND Id NOT IN (
+      SELECT MIN(Id) FROM Cdr
+      WHERE RawLine IS NOT NULL AND RawLine <> ''
+      GROUP BY Site, RawLine);";
+        return cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Index unique (site + ligne brute) rendant les imports idempotents.</summary>
+    private void CreateUniqueRawIndex()
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+CREATE UNIQUE INDEX IF NOT EXISTS UX_Cdr_SiteRaw
+ON Cdr(Site, RawLine)
+WHERE RawLine IS NOT NULL AND RawLine <> '';";
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>Ajoute une colonne si la base existante ne la contient pas encore (migration).</summary>
@@ -76,7 +103,7 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         using var cmd = _connection.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = @"
-INSERT INTO Cdr (Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
+INSERT OR IGNORE INTO Cdr (Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
                  DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
                  DureeAppelSecondes, RawLine, SourceFile, DateTransfert)
 VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne,

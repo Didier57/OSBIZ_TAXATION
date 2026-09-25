@@ -41,7 +41,11 @@ public sealed class CdrTransferService
             record.DateTransfert = horodatage;
 
         var inserted = repository.Insert(records);
-        log.Report($"[{site.Nom}] {inserted} appel(s) importe(s).");
+        var doublons = records.Count - inserted;
+        if (doublons > 0)
+            log.Report($"[{site.Nom}] {inserted} appel(s) importe(s), {doublons} doublon(s) ignore(s).");
+        else
+            log.Report($"[{site.Nom}] {inserted} appel(s) importe(s).");
 
         var supprime = false;
         if (site.SupprimerApresTransfert)
