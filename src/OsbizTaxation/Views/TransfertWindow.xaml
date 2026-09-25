@@ -8,6 +8,7 @@
         Background="{DynamicResource Brush.Window.Background}"
         Foreground="{DynamicResource Brush.Window.Foreground}"
         WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
         MinHeight="420" MinWidth="560">
     <Grid Margin="10">
         <Grid.RowDefinitions>

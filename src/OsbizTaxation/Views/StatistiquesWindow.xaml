@@ -8,7 +8,8 @@
         Title="Statistiques" Height="640" Width="1000"
         Background="{DynamicResource Brush.Window.Background}"
         Foreground="{DynamicResource Brush.Window.Foreground}"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         MinHeight="480" MinWidth="760">
     <Grid Margin="10">
         <Grid.RowDefinitions>

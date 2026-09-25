@@ -9,6 +9,7 @@
         Background="{DynamicResource Brush.Window.Background}"
         Foreground="{DynamicResource Brush.Window.Foreground}"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         MinHeight="520" MinWidth="900">
     <Window.Resources>
         <helpers:GroupBrushConverter x:Key="GroupBrush" />

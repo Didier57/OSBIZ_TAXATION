@@ -8,7 +8,8 @@
         Title="Recherche" Height="560" Width="1120"
         Background="{DynamicResource Brush.Window.Background}"
         Foreground="{DynamicResource Brush.Window.Foreground}"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         MinHeight="420" MinWidth="720">
     <Window.Resources>
         <helpers:GroupBrushConverter x:Key="GroupBrush" />
