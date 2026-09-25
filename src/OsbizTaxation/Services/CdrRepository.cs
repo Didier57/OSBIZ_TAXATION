@@ -57,7 +57,10 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         RecomputeCountries();
     }
 
-    /// <summary>Attribue le pays de destination aux appels internationaux deja stockes (numeros en 00).</summary>
+    /// <summary>
+    /// Recalcule le pays des appels deja stockes : pays de destination pour les
+    /// numeros internationaux (en 00), aucun pays pour les numeros locaux (4 chiffres ou moins).
+    /// </summary>
     public int RecomputeCountries()
     {
         using var tx = _connection.BeginTransaction();
@@ -66,12 +69,19 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         using (var select = _connection.CreateCommand())
         {
             select.Transaction = tx;
-            select.CommandText = "SELECT Id, NumeroExterne FROM Cdr WHERE NumeroExterne LIKE '00%';";
+            select.CommandText = "SELECT Id, NumeroExterne FROM Cdr;";
             using var reader = select.ExecuteReader();
             while (reader.Read())
             {
                 var id = reader.GetInt64(0);
                 var numero = reader.IsDBNull(1) ? null : reader.GetString(1);
+
+                if (PhoneCodes.IsLocal(numero))
+                {
+                    updates.Add((id, string.Empty));
+                    continue;
+                }
+
                 var pays = PhoneCodes.CountryNameForNumber(numero);
                 if (!string.IsNullOrEmpty(pays))
                     updates.Add((id, pays));

@@ -56,7 +56,9 @@ public static class CdrParser
             var record = ParseLine(trimmed, site, sourceFile, lignes);
             if (record != null)
             {
-                record.Pays = PhoneCodes.CountryNameForNumber(record.NumeroExterne) ?? pays;
+                record.Pays = PhoneCodes.IsLocal(record.NumeroExterne)
+                    ? string.Empty
+                    : PhoneCodes.CountryNameForNumber(record.NumeroExterne) ?? pays;
                 records.Add(record);
             }
         }

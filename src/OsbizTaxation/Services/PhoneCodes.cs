@@ -82,6 +82,25 @@ public static class PhoneCodes
         ["EH"] = "Sahara occidental"
     };
 
+    /// <summary>Nombre de chiffres presents dans le numero.</summary>
+    public static int DigitCount(string? number)
+    {
+        if (string.IsNullOrEmpty(number))
+            return 0;
+
+        var count = 0;
+        foreach (var c in number)
+        {
+            if (char.IsDigit(c))
+                count++;
+        }
+
+        return count;
+    }
+
+    /// <summary>Vrai si le numero est court (4 chiffres ou moins) : appel local, sans pays.</summary>
+    public static bool IsLocal(string? number) => DigitCount(number) <= 4;
+
     /// <summary>
     /// Retourne le nom du pays de destination si le numero commence par 00,
     /// sinon null (appel national dans le pays d'origine du site).
