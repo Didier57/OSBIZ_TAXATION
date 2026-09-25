@@ -16,6 +16,7 @@ public partial class ConfigurationWindow : Window
     {
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.Gear);
+        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         _main = main;
         _viewModel = new ConfigViewModel(main.Config);
         DataContext = _viewModel;

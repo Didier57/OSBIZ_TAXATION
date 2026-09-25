@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -9,10 +9,10 @@
     <RootNamespace>OsbizTaxation</RootNamespace>
     <AssemblyName>OsbizTaxation</AssemblyName>
 
-    <Version>1.1.1</Version>
-    <FileVersion>1.1.1.0</FileVersion>
-    <AssemblyVersion>1.1.1.0</AssemblyVersion>
-    <InformationalVersion>1.1.1</InformationalVersion>
+    <Version>1.1.2</Version>
+    <FileVersion>1.1.2.0</FileVersion>
+    <AssemblyVersion>1.1.2.0</AssemblyVersion>
+    <InformationalVersion>1.1.2</InformationalVersion>
     <Product>OSBIZ TAXATION</Product>
     <Company>Didier57</Company>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>

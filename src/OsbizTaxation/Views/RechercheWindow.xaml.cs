@@ -23,6 +23,7 @@ public partial class RechercheWindow : Window
     {
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.Search);
+        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         _main = main;
 
         CmdPeriode.SelectedIndex = 0;

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         Title = $"Taxation OSBIZ  ({_viewModel.Version})";
         UpdateThemeUi();
+        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         Loaded += OnLoaded;
         Closed += OnClosed;
     }
@@ -37,6 +38,7 @@ public partial class MainWindow : Window
     private void ApplyTheme(string theme)
     {
         ThemeManager.Apply(theme);
+        TitleBarTheme.ApplyToAllWindows();
         _viewModel.Config.Theme = theme;
         ConfigService.Save(_viewModel.Config);
         UpdateThemeUi();

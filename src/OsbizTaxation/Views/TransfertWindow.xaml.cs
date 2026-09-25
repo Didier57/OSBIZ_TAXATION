@@ -15,6 +15,7 @@ public partial class TransfertWindow : Window
     {
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.Download);
+        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         _main = main;
 
         foreach (var site in main.Config.Sites)

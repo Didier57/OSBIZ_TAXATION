@@ -18,6 +18,7 @@ public partial class ImportExportWindow : Window
     {
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.ImportExport);
+        SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         _main = main;
 
         CmdSite.Items.Add("(Deduire du nom du fichier)");
