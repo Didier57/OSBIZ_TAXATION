@@ -48,12 +48,6 @@
                     Cursor="Hand"
                     ToolTip="Changer de theme"
                     Click="OnThemeClick">
-                <Button.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem x:Name="MiClair" Header="Clair" Click="OnThemeClairClick" />
-                        <MenuItem x:Name="MiSombre" Header="Sombre" Click="OnThemeSombreClick" />
-                    </ContextMenu>
-                </Button.ContextMenu>
                 <TextBlock x:Name="TxtThemeIcon"
                            FontFamily="Segoe MDL2 Assets"
                            FontSize="16"
