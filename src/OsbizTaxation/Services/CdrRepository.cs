@@ -57,7 +57,9 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
     private void MigrateInfoLabels()
     {
         using var cmd = _connection.CreateCommand();
-        cmd.CommandText = "UPDATE Cdr SET Information = 'Entrant Transféré' WHERE Information = 'Entrant route';";
+        cmd.CommandText = @"
+UPDATE Cdr SET Information = 'Entrant Transféré' WHERE Information = 'Entrant route';
+UPDATE Cdr SET Information = 'Sortant Transféré' WHERE Information = 'Sortant route';";
         cmd.ExecuteNonQuery();
     }
 

@@ -17,7 +17,7 @@ public static class CdrParser
         "Entrant autre service",   // 3
         "Sortant autre service",   // 4
         "Entrant Transféré",       // 5
-        "Sortant route",           // 6
+        "Sortant Transféré",       // 6
         "Conference entrante",     // 7
         "Conference sortante",     // 8
         "Sortant deviation externe"// 9
