@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:OsbizTaxation.Helpers"
         mc:Ignorable="d"
-        Title="Recherche" Height="560" Width="980"
+        Title="Recherche" Height="560" Width="1120"
         WindowStartupLocation="CenterOwner"
         MinHeight="420" MinWidth="720">
     <Window.Resources>
@@ -19,36 +19,29 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+            <TextBlock Text="P&#233;riode" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <ComboBox x:Name="CmdPeriode" Width="110" Padding="4" VerticalContentAlignment="Center"
+                      SelectionChanged="OnPeriodeChanged">
+                <ComboBoxItem Content="Jour" />
+                <ComboBoxItem Content="Mois" />
+                <ComboBoxItem Content="Ann&#233;e" />
+            </ComboBox>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Site" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CmdSite" Margin="0,4,16,4" Padding="4" />
+            <Button x:Name="BtnPrec" Content="&#9664;" Width="34" Margin="8,0,0,0" Click="OnPrecedentClick" ToolTip="P&#233;riode pr&#233;c&#233;dente" />
 
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="Num&#233;ro" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <TextBox Grid.Row="0" Grid.Column="3" x:Name="TxtNumero" Margin="0,4" Padding="4" />
+            <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,8,0" />
+            <DatePicker x:Name="DpDate" Width="140" VerticalContentAlignment="Center"
+                        SelectedDateChanged="OnDateChanged" />
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Nom ligne" VerticalAlignment="Center" Margin="0,4,8,4" />
-            <TextBox Grid.Row="1" Grid.Column="1" x:Name="TxtNomLigne" Margin="0,4,16,4" Padding="4" />
+            <Button x:Name="BtnSuiv" Content="&#9654;" Width="34" Margin="8,0,0,0" Click="OnSuivantClick" ToolTip="P&#233;riode suivante" />
 
-            <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4">
-                <TextBlock Text="Du" VerticalAlignment="Center" Margin="0,0,6,0" />
-                <DatePicker x:Name="DpDebut" Width="130" />
-                <TextBlock Text="au" VerticalAlignment="Center" Margin="8,0,6,0" />
-                <DatePicker x:Name="DpFin" Width="130" />
-                <Button Content="Rechercher" Padding="16,4" Margin="12,0,0,0" Click="OnRechercherClick" />
-                <Button Content="R&#233;initialiser" Padding="12,4" Margin="8,0,0,0" Click="OnReinitialiserClick" />
-            </StackPanel>
-        </Grid>
+            <TextBlock Text="S&#233;lectionner le site" VerticalAlignment="Center" Margin="24,0,8,0" />
+            <ComboBox x:Name="CmdSite" Width="180" Padding="4" VerticalContentAlignment="Center"
+                      SelectionChanged="OnSiteChanged" />
+
+            <Button Content="Supprimer filtres" Padding="12,4" Margin="16,0,0,0" Click="OnSupprimerFiltresClick" />
+        </StackPanel>
 
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="0,6" Margin="0,6,0,6">
             <TextBlock x:Name="TxtResultat" Text="Aucune recherche." Foreground="Gray" />

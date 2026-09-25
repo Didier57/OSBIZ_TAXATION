@@ -4,7 +4,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace OsbizTaxation.Helpers;
 
@@ -15,6 +17,7 @@ public static class ExcelFilter
     {
         public string Path = string.Empty;
         public HashSet<string>? Allowed;
+        public Button? Button;
     }
 
     private sealed class CheckItem : INotifyPropertyChanged
@@ -59,7 +62,37 @@ public static class ExcelFilter
         }
 
         grid.Loaded += (_, _) => InstallView(grid);
+        grid.PreviewMouseRightButtonDown += (_, e) => OnGridRightClick(grid, e);
         InstallView(grid);
+    }
+
+    private static void OnGridRightClick(DataGrid grid, MouseButtonEventArgs e)
+    {
+        var header = FindHeader(e.OriginalSource as DependencyObject);
+        if (header?.Column == null)
+            return;
+        if (!States.TryGetValue(grid, out var filters))
+            return;
+
+        var filter = filters.FirstOrDefault(f => f.Path == GetPath(header.Column));
+        if (filter == null)
+            return;
+
+        e.Handled = true;
+        ShowPopup(grid, filter, header);
+    }
+
+    private static DataGridColumnHeader? FindHeader(DependencyObject? source)
+    {
+        while (source != null)
+        {
+            if (source is DataGridColumnHeader header)
+                return header;
+            source = source is Visual
+                ? VisualTreeHelper.GetParent(source)
+                : LogicalTreeHelper.GetParent(source);
+        }
+        return null;
     }
 
     private static void InstallView(DataGrid grid)
@@ -101,11 +134,21 @@ public static class ExcelFilter
         };
         Grid.SetColumn(label, 0);
 
+        var icon = new Path
+        {
+            Data = Geometry.Parse("M0,0 L12,0 L7,6 L7,12 L5,12 L5,6 Z"),
+            Fill = Brushes.Black,
+            Width = 11,
+            Height = 11,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
         var button = new Button
         {
-            Content = "▾",
-            FontSize = 8,
-            Padding = new Thickness(3, 0, 3, 0),
+            Content = icon,
+            Padding = new Thickness(4, 0, 4, 0),
             Margin = new Thickness(4, 0, 0, 0),
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
@@ -119,6 +162,7 @@ public static class ExcelFilter
             e.Handled = true;
             ShowPopup(grid, filter, button);
         };
+        filter.Button = button;
 
         panel.Children.Add(label);
         panel.Children.Add(button);
@@ -218,7 +262,7 @@ public static class ExcelFilter
             filter.Allowed = null;
             popup.IsOpen = false;
             Refresh(grid);
-            ApplyIndicator(target as Button, false);
+            ApplyIndicator(filter.Button, false);
         };
 
         apply.Click += (_, _) =>
@@ -227,7 +271,7 @@ public static class ExcelFilter
             filter.Allowed = selected.Count == items.Count ? null : selected;
             popup.IsOpen = false;
             Refresh(grid);
-            ApplyIndicator(target as Button, filter.Allowed != null);
+            ApplyIndicator(filter.Button, filter.Allowed != null);
         };
 
         popup.IsOpen = true;
@@ -237,9 +281,22 @@ public static class ExcelFilter
     {
         if (button == null)
             return;
-        button.Content = active ? "▾ " : "▾";
-        button.Foreground = active ? FilteredBrush : Brushes.Black;
-        button.FontWeight = active ? FontWeights.Bold : FontWeights.Normal;
+        if (button.Content is Path icon)
+            icon.Fill = active ? FilteredBrush : Brushes.Black;
+        button.ToolTip = active ? "Filtre actif" : "Trier / filtrer";
+    }
+
+    /// <summary>Retire tous les filtres de colonnes actifs.</summary>
+    public static void Clear(DataGrid grid)
+    {
+        if (!States.TryGetValue(grid, out var filters))
+            return;
+        foreach (var filter in filters)
+        {
+            filter.Allowed = null;
+            ApplyIndicator(filter.Button, false);
+        }
+        Refresh(grid);
     }
 
     private static void Refresh(DataGrid grid)
