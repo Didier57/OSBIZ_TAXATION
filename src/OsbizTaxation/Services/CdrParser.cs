@@ -85,7 +85,9 @@ public static class CdrParser
         var dureeSonnerie = Get(4);
         var dureeAppel = Get(5);
         var numeroExterne = Get(6);
+        var taxes = Get(7);
         var infoRaw = Get(8);
+        var accountCode = Get(9);
 
         // Format US = 17 champs (le n° de station est en position 17),
         // format standard = 14 champs (le n° de station est en position 14).
@@ -118,6 +120,8 @@ public static class CdrParser
             Information = InfoLibelle(infoCode),
             InfoCode = infoCode,
             NumeroExtra = numeroExtra,
+            Taxes = taxes,
+            AccountCode = accountCode,
             DureeAppelSecondes = duree.HasValue ? (int)Math.Round(duree.Value.TotalSeconds) : 0,
             RawLine = line,
             SourceFile = sourceFile

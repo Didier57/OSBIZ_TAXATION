@@ -35,6 +35,12 @@ public sealed class CdrRecord
 
     public string NumeroExtra { get; set; } = string.Empty;
 
+    /// <summary>Taxes / Call Charge Unit (champ 8 du fichier CDR, max 11 caracteres).</summary>
+    public string Taxes { get; set; } = string.Empty;
+
+    /// <summary>Account Code / PKZ (champ 10 du fichier CDR, max 11 caracteres).</summary>
+    public string AccountCode { get; set; } = string.Empty;
+
     public int DureeAppelSecondes { get; set; }
 
     public string RawLine { get; set; } = string.Empty;

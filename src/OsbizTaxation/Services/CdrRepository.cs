@@ -42,7 +42,9 @@ CREATE TABLE IF NOT EXISTS Cdr (
     RawLine            TEXT,
     SourceFile         TEXT,
     DateTransfert      TEXT,
-    Groupe             INTEGER DEFAULT 0
+    Groupe             INTEGER DEFAULT 0,
+    Taxes              TEXT,
+    AccountCode        TEXT
 );
 CREATE INDEX IF NOT EXISTS IX_Cdr_Date ON Cdr(DateIso);
 CREATE INDEX IF NOT EXISTS IX_Cdr_Site ON Cdr(Site);
@@ -51,6 +53,8 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
 
         EnsureColumn("Pays", "TEXT");
         EnsureColumn("Groupe", "INTEGER DEFAULT 0");
+        EnsureColumn("Taxes", "TEXT");
+        EnsureColumn("AccountCode", "TEXT");
         DeduplicateRawLines();
         CreateUniqueRawIndex();
         MigrateInfoLabels();
@@ -229,10 +233,10 @@ WHERE RawLine IS NOT NULL AND RawLine <> '';";
         cmd.CommandText = @"
 INSERT OR IGNORE INTO Cdr (Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
                  DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
-                 DureeAppelSecondes, RawLine, SourceFile, DateTransfert)
+                 Taxes, AccountCode, DureeAppelSecondes, RawLine, SourceFile, DateTransfert)
 VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne,
         $sonnerie, $duree, $externe, $info, $infoCode, $extra,
-        $secondes, $raw, $source, $transfert);";
+        $taxes, $accountCode, $secondes, $raw, $source, $transfert);";
 
         var pSite = cmd.Parameters.Add("$site", SqliteType.Text);
         var pPays = cmd.Parameters.Add("$pays", SqliteType.Text);
@@ -249,6 +253,8 @@ VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne
         var pInfo = cmd.Parameters.Add("$info", SqliteType.Text);
         var pInfoCode = cmd.Parameters.Add("$infoCode", SqliteType.Integer);
         var pExtra = cmd.Parameters.Add("$extra", SqliteType.Text);
+        var pTaxes = cmd.Parameters.Add("$taxes", SqliteType.Text);
+        var pAccountCode = cmd.Parameters.Add("$accountCode", SqliteType.Text);
         var pSecondes = cmd.Parameters.Add("$secondes", SqliteType.Integer);
         var pRaw = cmd.Parameters.Add("$raw", SqliteType.Text);
         var pSource = cmd.Parameters.Add("$source", SqliteType.Text);
@@ -272,6 +278,8 @@ VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne
             pInfo.Value = r.Information;
             pInfoCode.Value = r.InfoCode;
             pExtra.Value = r.NumeroExtra;
+            pTaxes.Value = r.Taxes;
+            pAccountCode.Value = r.AccountCode;
             pSecondes.Value = r.DureeAppelSecondes;
             pRaw.Value = r.RawLine;
             pSource.Value = r.SourceFile;
@@ -585,7 +593,7 @@ GROUP BY Site, Information, DateIso;";
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
-       DureeAppelSecondes, RawLine, SourceFile, DateTransfert, Groupe
+       DureeAppelSecondes, RawLine, SourceFile, DateTransfert, Groupe, Taxes, AccountCode
 FROM Cdr";
 
     private static List<CdrRecord> Read(SqliteCommand cmd)
@@ -616,7 +624,9 @@ FROM Cdr";
                 RawLine = reader.IsDBNull(17) ? "" : reader.GetString(17),
                 SourceFile = reader.IsDBNull(18) ? "" : reader.GetString(18),
                 DateTransfert = reader.IsDBNull(19) ? "" : reader.GetString(19),
-                Groupe = reader.IsDBNull(20) ? 0 : reader.GetInt32(20)
+                Groupe = reader.IsDBNull(20) ? 0 : reader.GetInt32(20),
+                Taxes = reader.IsDBNull(21) ? "" : reader.GetString(21),
+                AccountCode = reader.IsDBNull(22) ? "" : reader.GetString(22)
             });
         }
 

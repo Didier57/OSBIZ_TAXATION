@@ -91,6 +91,8 @@
                 <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="Auto" />
                 <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
                 <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="Auto" />
+                <DataGridTextColumn Header="Taxes" Binding="{Binding Taxes}" Width="Auto" />
+                <DataGridTextColumn Header="Account Code" Binding="{Binding AccountCode}" Width="Auto" />
                 <DataGridTextColumn Header="Groupe" Binding="{Binding Groupe}" Width="70" />
                 <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
             </DataGrid.Columns>
