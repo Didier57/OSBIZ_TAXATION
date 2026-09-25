@@ -6,6 +6,8 @@
         xmlns:helpers="clr-namespace:OsbizTaxation.Helpers"
         mc:Ignorable="d"
         Title="Recherche" Height="560" Width="1120"
+        Background="{DynamicResource Brush.Window.Background}"
+        Foreground="{DynamicResource Brush.Window.Foreground}"
         WindowStartupLocation="CenterOwner"
         MinHeight="420" MinWidth="720">
     <Window.Resources>

@@ -6,6 +6,8 @@
         xmlns:helpers="clr-namespace:OsbizTaxation.Helpers"
         mc:Ignorable="d"
         Title="Taxation OSBIZ" Height="720" Width="1200"
+        Background="{DynamicResource Brush.Window.Background}"
+        Foreground="{DynamicResource Brush.Window.Foreground}"
         WindowStartupLocation="CenterScreen"
         MinHeight="520" MinWidth="900">
     <Window.Resources>
