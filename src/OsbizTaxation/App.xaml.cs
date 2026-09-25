@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Windows;
 using OsbizTaxation.Helpers;
 using OsbizTaxation.Services;
@@ -29,8 +31,25 @@ public partial class App : Application
             return;
         }
 
-        ThemeManager.Apply(ConfigService.Load().Theme);
         base.OnStartup(e);
+
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+        var config = ConfigService.Load();
+        ThemeManager.Apply(config.Theme);
+
+        StartupManager.Sync(config.StartWithWindows);
+
+        var main = new MainWindow();
+        MainWindow = main;
+
+        bool launchMinimized = config.StartMinimized
+            || e.Args.Any(a => string.Equals(a, "--minimized", StringComparison.OrdinalIgnoreCase));
+
+        if (launchMinimized)
+            main.StartHiddenToTray();
+        else
+            main.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)

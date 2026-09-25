@@ -12,6 +12,12 @@ public sealed class AppConfig
 
     public int AutoTransferIntervalMinutes { get; set; } = 60;
 
+    /// <summary>Demarrer l'application automatiquement avec Windows (reduite).</summary>
+    public bool StartWithWindows { get; set; }
+
+    /// <summary>Demarrer l'application reduite dans la zone de notification.</summary>
+    public bool StartMinimized { get; set; }
+
     /// <summary>Dernier chemin de fichier utilise pour un import/export.</summary>
     public string DernierDossier { get; set; } = string.Empty;
 

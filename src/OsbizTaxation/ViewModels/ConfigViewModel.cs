@@ -10,6 +10,8 @@ public sealed class ConfigViewModel : ObservableObject
     private bool _checkUpdatesOnStartup;
     private bool _autoTransferEnabled;
     private string _autoTransferIntervalMinutes = "60";
+    private bool _startWithWindows;
+    private bool _startMinimized;
     private string _emailHote = string.Empty;
     private string _emailPort = "587";
     private bool _emailSsl = true;
@@ -26,6 +28,8 @@ public sealed class ConfigViewModel : ObservableObject
         _checkUpdatesOnStartup = config.CheckUpdatesOnStartup;
         _autoTransferEnabled = config.AutoTransferEnabled;
         _autoTransferIntervalMinutes = config.AutoTransferIntervalMinutes.ToString();
+        _startWithWindows = config.StartWithWindows;
+        _startMinimized = config.StartMinimized;
         DernierDossier = config.DernierDossier;
 
         var email = config.Email ?? new EmailConfig();
@@ -62,6 +66,18 @@ public sealed class ConfigViewModel : ObservableObject
     {
         get => _autoTransferIntervalMinutes;
         set => SetProperty(ref _autoTransferIntervalMinutes, value);
+    }
+
+    public bool StartWithWindows
+    {
+        get => _startWithWindows;
+        set => SetProperty(ref _startWithWindows, value);
+    }
+
+    public bool StartMinimized
+    {
+        get => _startMinimized;
+        set => SetProperty(ref _startMinimized, value);
     }
 
     public string EmailHote
@@ -133,6 +149,8 @@ public sealed class ConfigViewModel : ObservableObject
             CheckUpdatesOnStartup = CheckUpdatesOnStartup,
             AutoTransferEnabled = AutoTransferEnabled,
             AutoTransferIntervalMinutes = interval >= 1 ? interval : 60,
+            StartWithWindows = StartWithWindows,
+            StartMinimized = StartMinimized,
             DernierDossier = DernierDossier,
             Theme = _original.Theme,
             ColumnWidths = _original.ColumnWidths.ToDictionary(

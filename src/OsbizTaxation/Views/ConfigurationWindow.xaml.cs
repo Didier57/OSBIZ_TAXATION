@@ -140,6 +140,7 @@ public partial class ConfigurationWindow : Window
         }
 
         _main.ApplyConfig(config);
+        StartupManager.SetEnabled(config.StartWithWindows);
         MessageBox.Show("Configuration enregistree.", "Configuration",
             MessageBoxButton.OK, MessageBoxImage.Information);
     }

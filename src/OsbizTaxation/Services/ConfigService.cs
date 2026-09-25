@@ -47,6 +47,8 @@ public static class ConfigService
                 CheckUpdatesOnStartup = config.CheckUpdatesOnStartup,
                 AutoTransferEnabled = config.AutoTransferEnabled,
                 AutoTransferIntervalMinutes = config.AutoTransferIntervalMinutes,
+                StartWithWindows = config.StartWithWindows,
+                StartMinimized = config.StartMinimized,
                 DernierDossier = config.DernierDossier,
                 Theme = config.Theme,
                 ColumnWidths = config.ColumnWidths.ToDictionary(

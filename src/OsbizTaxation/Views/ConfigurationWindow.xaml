@@ -101,6 +101,11 @@
                         <TextBox Text="{Binding AutoTransferIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
                                  Width="80" Padding="4" />
                     </StackPanel>
+                    <Separator Margin="0,12" />
+                    <CheckBox Content="D&#233;marrer avec Windows (r&#233;duit dans la zone de notification)"
+                              IsChecked="{Binding StartWithWindows}" Margin="0,8" />
+                    <CheckBox Content="D&#233;marrer r&#233;duit dans la zone de notification"
+                              IsChecked="{Binding StartMinimized}" Margin="0,8" />
                 </StackPanel>
             </TabItem>
 
