@@ -2,13 +2,16 @@ namespace OsbizTaxation.Models;
 
 public sealed class AppConfig
 {
-    public string SourceUrl { get; set; } = string.Empty;
+    public List<SiteConfig> Sites { get; set; } = new();
 
-    public string OutputFile { get; set; } = string.Empty;
-
-    public bool AutoFetchEnabled { get; set; }
-
-    public int AutoFetchIntervalMinutes { get; set; } = 60;
+    public List<LineConfig> Lignes { get; set; } = new();
 
     public bool CheckUpdatesOnStartup { get; set; } = true;
+
+    public bool AutoTransferEnabled { get; set; }
+
+    public int AutoTransferIntervalMinutes { get; set; } = 60;
+
+    /// <summary>Dernier chemin de fichier utilise pour un import/export.</summary>
+    public string DernierDossier { get; set; } = string.Empty;
 }

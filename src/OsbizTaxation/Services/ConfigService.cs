@@ -4,46 +4,73 @@ using OsbizTaxation.Models;
 
 namespace OsbizTaxation.Services;
 
-public sealed class ConfigService
+/// <summary>Charge et enregistre la configuration (config.json). Les mots de passe sont chiffres (DPAPI).</summary>
+public static class ConfigService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    public static string LastError { get; private set; } = string.Empty;
 
-    public string ConfigDirectory { get; }
+    private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 
-    public string ConfigPath { get; }
-
-    public ConfigService()
+    public static AppConfig Load()
     {
-        ConfigDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "OsbizTaxation");
-        ConfigPath = Path.Combine(ConfigDirectory, "config.json");
-    }
-
-    public AppConfig Load()
-    {
+        LastError = string.Empty;
         try
         {
-            if (File.Exists(ConfigPath))
-            {
-                var json = File.ReadAllText(ConfigPath);
-                var config = JsonSerializer.Deserialize<AppConfig>(json);
-                if (config is not null)
-                    return config;
-            }
-        }
-        catch
-        {
-            // Fichier corrompu ou illisible : on repart sur la configuration par défaut.
-        }
+            if (!File.Exists(AppPaths.ConfigPath))
+                return new AppConfig();
 
-        return new AppConfig();
+            var json = File.ReadAllText(AppPaths.ConfigPath);
+            var config = JsonSerializer.Deserialize<AppConfig>(json, Options) ?? new AppConfig();
+
+            foreach (var site in config.Sites)
+                site.MotDePasse = SecretProtector.Unprotect(site.MotDePasse);
+
+            return config;
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            return new AppConfig();
+        }
     }
 
-    public void Save(AppConfig config)
+    public static bool Save(AppConfig config)
     {
-        Directory.CreateDirectory(ConfigDirectory);
-        var json = JsonSerializer.Serialize(config, JsonOptions);
-        File.WriteAllText(ConfigPath, json);
+        LastError = string.Empty;
+        try
+        {
+            var clone = new AppConfig
+            {
+                CheckUpdatesOnStartup = config.CheckUpdatesOnStartup,
+                AutoTransferEnabled = config.AutoTransferEnabled,
+                AutoTransferIntervalMinutes = config.AutoTransferIntervalMinutes,
+                DernierDossier = config.DernierDossier,
+                Sites = config.Sites.Select(s => new SiteConfig
+                {
+                    Nom = s.Nom,
+                    Adresse = s.Adresse,
+                    Utilisateur = s.Utilisateur,
+                    MotDePasse = SecretProtector.Protect(s.MotDePasse),
+                    PaysCode = s.PaysCode,
+                    SupprimerApresTransfert = s.SupprimerApresTransfert
+                }).ToList(),
+                Lignes = config.Lignes.Select(l => new LineConfig
+                {
+                    NumDebut = l.NumDebut,
+                    NumFin = l.NumFin,
+                    Site = l.Site,
+                    NomLigne = l.NomLigne
+                }).ToList()
+            };
+
+            Directory.CreateDirectory(AppPaths.AppDirectory);
+            File.WriteAllText(AppPaths.ConfigPath, JsonSerializer.Serialize(clone, Options));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            return false;
+        }
     }
 }

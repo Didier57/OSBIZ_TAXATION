@@ -4,94 +4,70 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="OSBIZ TAXATION" Height="640" Width="860"
+        Title="Taxation OSBIZ" Height="720" Width="1200"
         WindowStartupLocation="CenterScreen"
-        MinHeight="520" MinWidth="720">
-    <Grid Margin="12">
+        MinHeight="520" MinWidth="900">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="OSBIZ TAXATION" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
-            <TextBlock Text="{Binding Version, StringFormat={}  v{0}}" FontSize="12"
-                       VerticalAlignment="Bottom" Margin="6,0,0,3" Foreground="Gray" />
-        </StackPanel>
+        <Menu Grid.Row="0" IsMainMenu="True">
+            <MenuItem Header="_Fichier">
+                <MenuItem Header="_Quitter" Click="OnQuitClick" />
+            </MenuItem>
+            <MenuItem Header="_Configuration" Click="OnConfigurationClick" />
+            <MenuItem Header="_Transfert" Click="OnTransfertClick" />
+            <MenuItem Header="_Recherche" Click="OnRechercheClick" />
+            <MenuItem Header="_Statistiques" Click="OnStatistiquesClick" />
+            <MenuItem Header="_Import/Export" Click="OnImportExportClick" />
+            <MenuItem Header="?" Click="OnAboutClick" />
+        </Menu>
 
-        <GroupBox Grid.Row="1" Header="Configuration" Padding="8" Margin="0,0,0,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <DataGrid x:Name="GridCdr"
+                  Grid.Row="1"
+                  Margin="8"
+                  ItemsSource="{Binding Records}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  HeadersVisibility="Column"
+                  SelectionMode="Extended"
+                  SelectionUnit="FullRow"
+                  GridLinesVisibility="Horizontal"
+                  EnableRowVirtualization="True"
+                  FrozenColumnCount="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="90" />
+                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
+                <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
+                <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />
+                <DataGridTextColumn Header="Ligne" Binding="{Binding Ligne}" Width="60" />
+                <DataGridTextColumn Header="Nom Ligne" Binding="{Binding NomLigne}" Width="120" />
+                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="90" />
+                <DataGridTextColumn Header="Dur&#233;e Sonnerie" Binding="{Binding DureeSonnerie}" Width="105" />
+                <DataGridTextColumn Header="Dur&#233;e appel" Binding="{Binding DureeAppel}" Width="95" />
+                <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="130" />
+                <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="170" />
+                <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="110" />
+            </DataGrid.Columns>
+        </DataGrid>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="URL source (HTTPS)" VerticalAlignment="Center" Margin="0,4" />
-                <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="4"
-                         Padding="4" MinHeight="26"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding SourceUrl, UpdateSourceTrigger=PropertyChanged}" />
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Fichier texte de sortie" VerticalAlignment="Center" Margin="0,4" />
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="4"
-                         Padding="4" MinHeight="26"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding OutputFile, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Row="1" Grid.Column="2" Content="Parcourir..."
-                        Padding="10,2" Margin="4"
-                        Command="{Binding BrowseOutputFileCommand}" />
-
-                <CheckBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="4,8,4,4"
-                          Content="Activer la recuperation automatique"
-                          IsChecked="{Binding AutoFetchEnabled}" />
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Intervalle (minutes)" VerticalAlignment="Center" Margin="0,4" />
-                <TextBox Grid.Row="3" Grid.Column="1" Margin="4" Width="80" HorizontalAlignment="Left"
-                         Padding="4" MinHeight="26"
-                         VerticalContentAlignment="Center"
-                         Text="{Binding AutoFetchIntervalMinutes, UpdateSourceTrigger=PropertyChanged}" />
-
-                <CheckBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="4,8,4,4"
-                          Content="Verifier les mises a jour au demarrage"
-                          IsChecked="{Binding CheckUpdatesOnStartup}" />
-            </Grid>
-        </GroupBox>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Recuperer maintenant" Padding="14,6" Margin="0,0,8,0"
-                    Command="{Binding FetchNowCommand}" />
-            <Button Content="Enregistrer la configuration" Padding="14,6" Margin="0,0,8,0"
-                    Command="{Binding SaveConfigCommand}" />
-            <Button Content="Verifier les mises a jour" Padding="14,6" Margin="0,0,8,0"
-                    Command="{Binding CheckUpdatesCommand}" />
-            <Button Content="Ouvrir le dossier" Padding="14,6" Margin="0,0,8,0"
-                    Command="{Binding OpenOutputFolderCommand}" />
-            <Button Content="Effacer le journal" Padding="14,6"
-                    Command="{Binding ClearLogCommand}" />
-        </StackPanel>
-
-        <Border Grid.Row="3" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="0,4" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Status, StringFormat={}Statut : {0}}" FontWeight="SemiBold" Margin="0,0,20,0" />
-                <TextBlock Text="{Binding LastFetch, StringFormat={}Derniere recuperation : {0}}" Foreground="Gray" />
-            </StackPanel>
-        </Border>
-
-        <GroupBox Grid.Row="4" Header="Journal" Padding="4">
-            <ListBox ItemsSource="{Binding Logs}"
-                     FontFamily="Consolas" FontSize="12"
-                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
-        </GroupBox>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding Status}" />
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <TextBlock Text="{Binding LastTransfer, StringFormat={}Dernier transfert : {0}}" />
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem>
+                <TextBlock Text="{Binding Version, StringFormat={}Version {0}}" />
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
