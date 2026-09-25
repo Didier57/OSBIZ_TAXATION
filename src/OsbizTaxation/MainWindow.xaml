@@ -18,17 +18,48 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" IsMainMenu="True">
-            <MenuItem Header="_Fichier">
-                <MenuItem Header="_Quitter" Click="OnQuitClick" />
-            </MenuItem>
-            <MenuItem Header="_Configuration" Click="OnConfigurationClick" />
-            <MenuItem Header="_Transfert" Click="OnTransfertClick" />
-            <MenuItem Header="_Recherche" Click="OnRechercheClick" />
-            <MenuItem Header="_Statistiques" Click="OnStatistiquesClick" />
-            <MenuItem Header="_Import/Export" Click="OnImportExportClick" />
-            <MenuItem Header="?" Click="OnAboutClick" />
-        </Menu>
+        <Grid Grid.Row="0" Background="{DynamicResource Brush.Menu.Background}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Menu Grid.Column="0" IsMainMenu="True">
+                <MenuItem Header="_Fichier">
+                    <MenuItem Header="_Quitter" Click="OnQuitClick" />
+                </MenuItem>
+                <MenuItem Header="_Configuration" Click="OnConfigurationClick" />
+                <MenuItem Header="_Transfert" Click="OnTransfertClick" />
+                <MenuItem Header="_Recherche" Click="OnRechercheClick" />
+                <MenuItem Header="_Statistiques" Click="OnStatistiquesClick" />
+                <MenuItem Header="_Import/Export" Click="OnImportExportClick" />
+                <MenuItem Header="?" Click="OnAboutClick" />
+            </Menu>
+
+            <Button x:Name="BtnTheme"
+                    Grid.Column="1"
+                    Width="40" Height="24"
+                    Margin="0,1,4,0"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    ToolTip="Changer de theme"
+                    Click="OnThemeClick">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem x:Name="MiClair" Header="Clair" Click="OnThemeClairClick" />
+                        <MenuItem x:Name="MiSombre" Header="Sombre" Click="OnThemeSombreClick" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+                <TextBlock x:Name="TxtThemeIcon"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="16"
+                           Text="&#xE708;"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Button>
+        </Grid>
 
         <DataGrid x:Name="GridCdr"
                   Grid.Row="1"

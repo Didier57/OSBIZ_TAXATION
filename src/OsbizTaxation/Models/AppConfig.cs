@@ -14,4 +14,7 @@ public sealed class AppConfig
 
     /// <summary>Dernier chemin de fichier utilise pour un import/export.</summary>
     public string DernierDossier { get; set; } = string.Empty;
+
+    /// <summary>Theme de l'interface : "Clair" ou "Sombre".</summary>
+    public string Theme { get; set; } = "Clair";
 }

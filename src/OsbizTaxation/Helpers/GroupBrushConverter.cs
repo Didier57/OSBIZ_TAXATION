@@ -23,9 +23,26 @@ public sealed class GroupBrushConverter : IValueConverter
         new SolidColorBrush(Color.FromRgb(0xF0, 0xEF, 0xC8))
     };
 
+    // Teintes plus sombres pour le theme sombre (texte clair lisible).
+    private static readonly Brush[] DarkPalette =
+    {
+        Brushes.Transparent,
+        new SolidColorBrush(Color.FromRgb(0x3A, 0x34, 0x21)),
+        new SolidColorBrush(Color.FromRgb(0x1F, 0x37, 0x4A)),
+        new SolidColorBrush(Color.FromRgb(0x1E, 0x3D, 0x2A)),
+        new SolidColorBrush(Color.FromRgb(0x44, 0x23, 0x2E)),
+        new SolidColorBrush(Color.FromRgb(0x36, 0x2A, 0x44)),
+        new SolidColorBrush(Color.FromRgb(0x4A, 0x33, 0x20)),
+        new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x38)),
+        new SolidColorBrush(Color.FromRgb(0x3A, 0x3A, 0x1E))
+    };
+
+    /// <summary>Vrai lorsque le theme sombre est actif (palette de fond assombrie).</summary>
+    public static bool DarkMode { get; set; }
+
     static GroupBrushConverter()
     {
-        foreach (var brush in Palette)
+        foreach (var brush in Palette.Concat(DarkPalette))
         {
             if (brush is SolidColorBrush solid)
                 solid.Freeze();
@@ -34,11 +51,12 @@ public sealed class GroupBrushConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
+        var palette = DarkMode ? DarkPalette : Palette;
         var groupe = value is int g ? g : 0;
         if (groupe <= 0)
-            return Palette[0];
+            return palette[0];
 
-        return Palette[((groupe - 1) % (Palette.Length - 1)) + 1];
+        return palette[((groupe - 1) % (palette.Length - 1)) + 1];
     }
 
     /// <summary>Couleur RGB (6 chiffres hexa) du fond pour un groupe, ou null si aucun groupe.</summary>

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using OsbizTaxation.Helpers;
+using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
 using OsbizTaxation.Views;
 
@@ -14,9 +15,46 @@ public partial class MainWindow : Window
         InitializeComponent();
         Icon = WindowIcons.Create(WindowIcons.Headset);
         DataContext = _viewModel;
+        UpdateThemeUi();
         Loaded += OnLoaded;
         Closed += OnClosed;
     }
+
+    private void UpdateThemeUi()
+    {
+        var dark = ThemeManager.IsDark;
+        TxtThemeIcon.Text = dark ? "\uE706" : "\uE708";
+        BtnTheme.ToolTip = dark ? "Passer en mode clair" : "Passer en mode sombre";
+
+        if (BtnTheme.ContextMenu != null)
+        {
+            MiClair.Header = dark ? "Clair" : "\u2713  Clair";
+            MiSombre.Header = dark ? "\u2713  Sombre" : "Sombre";
+        }
+    }
+
+    private void ApplyTheme(string theme)
+    {
+        ThemeManager.Apply(theme);
+        _viewModel.Config.Theme = theme;
+        ConfigService.Save(_viewModel.Config);
+        UpdateThemeUi();
+        _viewModel.ReloadRecords();
+    }
+
+    private void OnThemeClick(object sender, RoutedEventArgs e)
+    {
+        if (BtnTheme.ContextMenu is not { } menu)
+            return;
+
+        menu.PlacementTarget = BtnTheme;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    private void OnThemeClairClick(object sender, RoutedEventArgs e) => ApplyTheme(ThemeManager.Light);
+
+    private void OnThemeSombreClick(object sender, RoutedEventArgs e) => ApplyTheme(ThemeManager.Dark);
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
         => await _viewModel.CheckUpdatesOnStartupAsync();

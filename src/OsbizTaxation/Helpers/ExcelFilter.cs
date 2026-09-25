@@ -94,9 +94,13 @@ public static class ExcelFilter
     private static readonly Dictionary<DataGrid, List<ColumnFilter>> States = new();
     private static readonly Dictionary<string, RememberedFilter> Remembered = new();
     private static readonly Brush FilteredBrush = new SolidColorBrush(Color.FromRgb(0x0B, 0x66, 0xC3));
-    private static readonly Brush GreyBrush = new SolidColorBrush(Color.FromRgb(0x66, 0x66, 0x66));
     private static readonly Brush HintBrush = new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99));
-    private static readonly Brush HoverBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xF0, 0xFB));
+
+    private static Brush GreyBrush =>
+        Application.Current?.TryFindResource("Brush.Control.Foreground") as Brush ?? Brushes.DimGray;
+
+    private static Brush HoverBrush =>
+        Application.Current?.TryFindResource("Brush.Menu.Hover") as Brush ?? Brushes.Gainsboro;
 
     public static void Attach(DataGrid grid)
     {
@@ -232,6 +236,7 @@ public static class ExcelFilter
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
+        icon.SetResourceReference(Shape.FillProperty, "Brush.Filter.Icon");
 
         var button = new Button
         {
@@ -297,11 +302,11 @@ public static class ExcelFilter
         searchGrid.Children.Add(searchBox);
         var searchBorder = new Border
         {
-            BorderBrush = new SolidColorBrush(Color.FromRgb(0xBB, 0xBB, 0xBB)),
             BorderThickness = new Thickness(1),
             Margin = new Thickness(6, 6, 6, 6),
             Child = searchGrid
         };
+        searchBorder.SetResourceReference(Border.BorderBrushProperty, "Brush.Control.Border");
 
         var list = new ListBox
         {
@@ -510,11 +515,12 @@ public static class ExcelFilter
 
         var border = new Border
         {
-            Background = Brushes.White,
-            BorderBrush = Brushes.Gray,
             BorderThickness = new Thickness(1),
             Child = panel
         };
+        border.SetResourceReference(Border.BackgroundProperty, "Brush.Menu.Background");
+        border.SetResourceReference(Border.BorderBrushProperty, "Brush.Control.Border");
+        border.SetResourceReference(System.Windows.Documents.TextElement.ForegroundProperty, "Brush.Menu.Foreground");
 
         var popup = new Popup
         {
@@ -639,7 +645,12 @@ public static class ExcelFilter
         if (button == null)
             return;
         if (button.Content is Path icon)
-            icon.Fill = active ? FilteredBrush : Brushes.Black;
+        {
+            if (active)
+                icon.Fill = FilteredBrush;
+            else
+                icon.SetResourceReference(Shape.FillProperty, "Brush.Filter.Icon");
+        }
         button.ToolTip = active ? "Filtre actif" : "Trier / filtrer";
     }
 

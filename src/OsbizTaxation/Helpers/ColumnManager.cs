@@ -111,7 +111,7 @@ public static class ColumnManager
         var hint = new TextBlock
         {
             Text = "Glissez pour réordonner, décochez pour masquer.",
-            Foreground = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)),
+            Opacity = 0.7,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(8, 8, 8, 2)
         };
@@ -131,11 +131,12 @@ public static class ColumnManager
 
         var border = new Border
         {
-            Background = Brushes.White,
-            BorderBrush = Brushes.Gray,
             BorderThickness = new Thickness(1),
             Child = panel
         };
+        border.SetResourceReference(Border.BackgroundProperty, "Brush.Menu.Background");
+        border.SetResourceReference(Border.BorderBrushProperty, "Brush.Control.Border");
+        border.SetResourceReference(System.Windows.Documents.TextElement.ForegroundProperty, "Brush.Menu.Foreground");
 
         var popup = new Popup
         {

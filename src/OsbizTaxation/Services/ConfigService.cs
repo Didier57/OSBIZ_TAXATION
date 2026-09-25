@@ -45,6 +45,7 @@ public static class ConfigService
                 AutoTransferEnabled = config.AutoTransferEnabled,
                 AutoTransferIntervalMinutes = config.AutoTransferIntervalMinutes,
                 DernierDossier = config.DernierDossier,
+                Theme = config.Theme,
                 Sites = config.Sites.Select(s => new SiteConfig
                 {
                     Nom = s.Nom,
