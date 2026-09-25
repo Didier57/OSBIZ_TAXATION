@@ -118,6 +118,9 @@ public partial class RechercheWindow : Window
 
     private void OnSupprimerFiltresClick(object sender, RoutedEventArgs e) => ExcelFilter.Clear(GridResultats);
 
+    private void OnColonnesClick(object sender, RoutedEventArgs e) =>
+        ColumnManager.Show(GridResultats, (UIElement)sender);
+
     private void OnExportExcelClick(object sender, RoutedEventArgs e)
     {
         var columns = GridResultats.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();

@@ -51,7 +51,6 @@
             </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="Auto" />
-                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
                 <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
                 <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />
@@ -64,6 +63,7 @@
                 <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
                 <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="Auto" />
                 <DataGridTextColumn Header="Groupe" Binding="{Binding Groupe}" Width="70" />
+                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 

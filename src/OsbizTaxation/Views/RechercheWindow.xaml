@@ -66,7 +66,6 @@
             </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="Auto" />
-                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
                 <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
                 <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />
@@ -77,10 +76,13 @@
                 <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="Auto" />
                 <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
                 <DataGridTextColumn Header="Groupe" Binding="{Binding Groupe}" Width="70" />
+                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Colonnes…" Padding="18,6" Margin="0,0,8,0" Click="OnColonnesClick"
+                    ToolTip="R&#233;ordonner ou masquer les colonnes" />
             <Button Content="Export Excel" Padding="18,6" Margin="0,0,8,0" Click="OnExportExcelClick"
                     ToolTip="Exporter les lignes affich&#233;es (filtres compris) vers Excel" />
             <Button Content="Fermer" Padding="18,6" Click="OnFermerClick" />
