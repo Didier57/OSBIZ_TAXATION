@@ -58,6 +58,7 @@
                         <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,6,0" />
                         <DatePicker x:Name="DpHeureDate" Width="140" SelectedDateChanged="OnHeureDateChanged" />
                         <Button x:Name="BtnHeureSuiv" Content="&#x25BA;" Width="34" Margin="6,0,0,0" Click="OnHeureSuivClick" ToolTip="Jour suivant" />
+                        <Button x:Name="BtnHeureAujourdhui" Content="Aujourd'hui" Margin="10,0,0,0" Click="OnHeureAujourdhuiClick" ToolTip="Revenir au jour actuel" />
                         <TextBlock Text="Total Entrant" VerticalAlignment="Center" Margin="28,0,6,0" />
                         <TextBox x:Name="TxtHeureEntrant" Width="60" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center" />
                         <TextBlock Text="Total Sortant" VerticalAlignment="Center" Margin="16,0,6,0" />

@@ -143,6 +143,12 @@ public partial class StatistiquesWindow : Window
         RefreshHeure();
     }
 
+    private void OnHeureAujourdhuiClick(object sender, RoutedEventArgs e)
+    {
+        DpHeureDate.SelectedDate = DateTime.Today;
+        RefreshHeure();
+    }
+
     private void RefreshHeure()
     {
         if (CmdSiteHeure.SelectedItem is not string site || string.IsNullOrWhiteSpace(site))
