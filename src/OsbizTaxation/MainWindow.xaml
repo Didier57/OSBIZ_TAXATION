@@ -41,19 +41,19 @@
                   EnableRowVirtualization="True"
                   FrozenColumnCount="1">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="90" />
-                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="110" />
+                <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="Auto" />
+                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
                 <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
                 <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />
-                <DataGridTextColumn Header="Ligne" Binding="{Binding Ligne}" Width="60" />
-                <DataGridTextColumn Header="Nom Ligne" Binding="{Binding NomLigne}" Width="120" />
-                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="90" />
+                <DataGridTextColumn Header="Ligne" Binding="{Binding Ligne}" Width="Auto" />
+                <DataGridTextColumn Header="Nom Ligne" Binding="{Binding NomLigne}" Width="Auto" />
+                <DataGridTextColumn Header="N&#176; Interne" Binding="{Binding NumeroInterne}" Width="Auto" />
                 <DataGridTextColumn Header="Dur&#233;e Sonnerie" Binding="{Binding DureeSonnerie}" Width="105" />
                 <DataGridTextColumn Header="Dur&#233;e appel" Binding="{Binding DureeAppel}" Width="95" />
-                <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="130" />
-                <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="170" />
-                <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="110" />
+                <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="Auto" />
+                <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
+                <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 
