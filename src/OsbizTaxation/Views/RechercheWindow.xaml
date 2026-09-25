@@ -36,6 +36,9 @@
 
             <Button x:Name="BtnSuiv" Content="&#9654;" Width="34" Margin="8,0,0,0" Click="OnSuivantClick" ToolTip="P&#233;riode suivante" />
 
+            <Button x:Name="BtnAujourdhui" Content="Aujourd'hui" Padding="10,4" Margin="8,0,0,0"
+                    Click="OnAujourdhuiClick" ToolTip="Revenir &#224; la date du jour" />
+
             <TextBlock Text="S&#233;lectionner le site" VerticalAlignment="Center" Margin="24,0,8,0" />
             <ComboBox x:Name="CmdSite" Width="180" Padding="4" VerticalContentAlignment="Center"
                       SelectionChanged="OnSiteChanged" />

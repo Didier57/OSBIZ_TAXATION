@@ -48,6 +48,12 @@ public partial class RechercheWindow : Window
 
     private void OnSuivantClick(object sender, RoutedEventArgs e) => Decaler(1);
 
+    private void OnAujourdhuiClick(object sender, RoutedEventArgs e)
+    {
+        DpDate.SelectedDate = DateTime.Today;
+        RunSearch();
+    }
+
     private void Decaler(int sens)
     {
         var date = DpDate.SelectedDate ?? DateTime.Today;
