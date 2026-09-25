@@ -126,6 +126,10 @@ public partial class ImportExportWindow : Window
             }
         }
 
+        var groupes = _main.Repository.RebuildGroups();
+        if (groupes > 0)
+            Log($"{groupes} enregistrement(s) relie(s) a un meme appel.");
+
         return total;
     }
 

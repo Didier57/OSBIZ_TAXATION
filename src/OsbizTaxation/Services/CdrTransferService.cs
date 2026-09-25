@@ -41,11 +41,14 @@ public sealed class CdrTransferService
             record.DateTransfert = horodatage;
 
         var inserted = repository.Insert(records);
+        var groupes = repository.RebuildGroups();
         var doublons = records.Count - inserted;
         if (doublons > 0)
             log.Report($"[{site.Nom}] {inserted} appel(s) importe(s), {doublons} doublon(s) ignore(s).");
         else
             log.Report($"[{site.Nom}] {inserted} appel(s) importe(s).");
+        if (groupes > 0)
+            log.Report($"[{site.Nom}] {groupes} enregistrement(s) relie(s) a un meme appel.");
 
         var supprime = false;
         if (site.SupprimerApresTransfert)

@@ -3,10 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helpers="clr-namespace:OsbizTaxation.Helpers"
         mc:Ignorable="d"
         Title="Taxation OSBIZ" Height="720" Width="1200"
         WindowStartupLocation="CenterScreen"
         MinHeight="520" MinWidth="900">
+    <Window.Resources>
+        <helpers:GroupBrushConverter x:Key="GroupBrush" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -40,6 +44,11 @@
                   GridLinesVisibility="Horizontal"
                   EnableRowVirtualization="True"
                   FrozenColumnCount="1">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="{Binding Groupe, Converter={StaticResource GroupBrush}}" />
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="Auto" />
                 <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="Auto" />
@@ -54,6 +63,7 @@
                 <DataGridTextColumn Header="Num&#233;ro Externe" Binding="{Binding NumeroExterne}" Width="Auto" />
                 <DataGridTextColumn Header="Information" Binding="{Binding Information}" Width="Auto" />
                 <DataGridTextColumn Header="Num&#233;ro Extra" Binding="{Binding NumeroExtra}" Width="Auto" />
+                <DataGridTextColumn Header="Groupe" Binding="{Binding Groupe}" Width="70" />
             </DataGrid.Columns>
         </DataGrid>
 

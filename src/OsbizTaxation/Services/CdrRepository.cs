@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS Cdr (
     DureeAppelSecondes INTEGER,
     RawLine            TEXT,
     SourceFile         TEXT,
-    DateTransfert      TEXT
+    DateTransfert      TEXT,
+    Groupe             INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS IX_Cdr_Date ON Cdr(DateIso);
 CREATE INDEX IF NOT EXISTS IX_Cdr_Site ON Cdr(Site);
@@ -48,9 +49,11 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         cmd.ExecuteNonQuery();
 
         EnsureColumn("Pays", "TEXT");
+        EnsureColumn("Groupe", "INTEGER DEFAULT 0");
         DeduplicateRawLines();
         CreateUniqueRawIndex();
         MigrateInfoLabels();
+        RebuildGroups();
     }
 
     /// <summary>Met a jour les libelles d'information deja stockes lors d'un renommage.</summary>
@@ -61,6 +64,68 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
 UPDATE Cdr SET Information = 'Entrant Transféré' WHERE Information = 'Entrant route';
 UPDATE Cdr SET Information = 'Sortant Transféré' WHERE Information = 'Sortant route';";
         cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Recalcule les groupes d'appel (jambes d'un meme appel reliees par un transfert).
+    /// Deux enregistrements sont du meme appel s'ils partagent Site + Date + Heure de debut + poste
+    /// et qu'au moins l'un des deux est un appel route/transfere (code info en 5 ou 6).
+    /// Retourne le nombre d'enregistrements groupes.
+    /// </summary>
+    public int RebuildGroups()
+    {
+        using var tx = _connection.BeginTransaction();
+
+        using (var reset = _connection.CreateCommand())
+        {
+            reset.Transaction = tx;
+            reset.CommandText = "UPDATE Cdr SET Groupe = 0;";
+            reset.ExecuteNonQuery();
+        }
+
+        var keys = new List<(string Site, string DateIso, string HeureDebut, string Interne)>();
+        using (var find = _connection.CreateCommand())
+        {
+            find.Transaction = tx;
+            find.CommandText = @"
+SELECT Site, DateIso, HeureDebut, NumeroInterne
+FROM Cdr
+WHERE NumeroInterne IS NOT NULL AND NumeroInterne <> ''
+  AND HeureDebut IS NOT NULL AND HeureDebut <> ''
+GROUP BY Site, DateIso, HeureDebut, NumeroInterne
+HAVING COUNT(*) >= 2
+   AND SUM(CASE WHEN (InfoCode % 10) IN (5, 6) THEN 1 ELSE 0 END) >= 1;";
+            using var reader = find.ExecuteReader();
+            while (reader.Read())
+            {
+                keys.Add((
+                    reader.IsDBNull(0) ? "" : reader.GetString(0),
+                    reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    reader.IsDBNull(3) ? "" : reader.GetString(3)));
+            }
+        }
+
+        var total = 0;
+        var group = 1;
+        foreach (var key in keys)
+        {
+            using var update = _connection.CreateCommand();
+            update.Transaction = tx;
+            update.CommandText = @"
+UPDATE Cdr SET Groupe = $groupe
+WHERE Site = $site AND DateIso = $date AND HeureDebut = $debut AND NumeroInterne = $interne;";
+            update.Parameters.AddWithValue("$groupe", group);
+            update.Parameters.AddWithValue("$site", key.Site);
+            update.Parameters.AddWithValue("$date", key.DateIso);
+            update.Parameters.AddWithValue("$debut", key.HeureDebut);
+            update.Parameters.AddWithValue("$interne", key.Interne);
+            total += update.ExecuteNonQuery();
+            group++;
+        }
+
+        tx.Commit();
+        return total;
     }
 
     /// <summary>Supprime les doublons deja presents (meme site + meme ligne brute).</summary>
@@ -271,7 +336,7 @@ WHERE Site = $site
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
-       DureeAppelSecondes, RawLine, SourceFile, DateTransfert
+       DureeAppelSecondes, RawLine, SourceFile, DateTransfert, Groupe
 FROM Cdr";
 
     private static List<CdrRecord> Read(SqliteCommand cmd)
@@ -301,7 +366,8 @@ FROM Cdr";
                 DureeAppelSecondes = reader.IsDBNull(16) ? 0 : reader.GetInt32(16),
                 RawLine = reader.IsDBNull(17) ? "" : reader.GetString(17),
                 SourceFile = reader.IsDBNull(18) ? "" : reader.GetString(18),
-                DateTransfert = reader.IsDBNull(19) ? "" : reader.GetString(19)
+                DateTransfert = reader.IsDBNull(19) ? "" : reader.GetString(19),
+                Groupe = reader.IsDBNull(20) ? 0 : reader.GetInt32(20)
             });
         }
 

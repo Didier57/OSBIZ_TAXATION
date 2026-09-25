@@ -42,4 +42,7 @@ public sealed class CdrRecord
     public string SourceFile { get; set; } = string.Empty;
 
     public string DateTransfert { get; set; } = string.Empty;
+
+    /// <summary>Numero de groupe d'appel (0 = aucun). Relie les jambes d'un meme appel (transfert).</summary>
+    public int Groupe { get; set; }
 }
