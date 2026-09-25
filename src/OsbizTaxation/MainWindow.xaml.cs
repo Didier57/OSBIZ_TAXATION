@@ -247,7 +247,7 @@ public partial class MainWindow : Window
     private void OnAboutClick(object sender, RoutedEventArgs e)
     {
         MessageBox.Show(
-            $"Taxation OSBIZ\nVersion {_viewModel.Version}\n\nDossier de travail :\n{OsbizTaxation.Services.AppPaths.AppDirectory}",
+            $"Taxation OSBIZ\nVersion {_viewModel.Version}\n\nDossier de travail :\n{OsbizTaxation.Services.AppPaths.AppDirectory}\n\nMises a jour : github.com/Didier57/OSBIZ_TAXATION",
             "A propos", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
