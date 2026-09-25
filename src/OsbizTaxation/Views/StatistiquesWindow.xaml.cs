@@ -21,9 +21,15 @@ public partial class StatistiquesWindow : Window
         var today = DateTime.Today;
 
         foreach (var site in main.Config.Sites)
+        {
             CmdSite.Items.Add(site.Nom);
+            CmdSiteHeure.Items.Add(site.Nom);
+        }
+
         if (CmdSite.Items.Count > 0)
             CmdSite.SelectedIndex = 0;
+        if (CmdSiteHeure.Items.Count > 0)
+            CmdSiteHeure.SelectedIndex = 0;
 
         PopulateYears(today.Year);
 
@@ -31,8 +37,11 @@ public partial class StatistiquesWindow : Window
             CmdMois.Items.Add(m.ToString("00"));
         CmdMois.SelectedIndex = today.Month - 1;
 
+        DpHeureDate.SelectedDate = today;
+
         _initialise = false;
         Refresh();
+        RefreshHeure();
     }
 
     private void PopulateYears(int defaultYear)
@@ -106,6 +115,70 @@ public partial class StatistiquesWindow : Window
         TxtEntrant.Text = totalEntrant.ToString(CultureInfo.InvariantCulture);
         TxtSortant.Text = totalSortant.ToString(CultureInfo.InvariantCulture);
         TxtTotal.Text = (totalEntrant + totalSortant).ToString(CultureInfo.InvariantCulture);
+    }
+
+    private void OnHeureFilterChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshHeure();
+    }
+
+    private void OnHeureDateChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshHeure();
+    }
+
+    private void OnHeurePrecClick(object sender, RoutedEventArgs e)
+    {
+        DpHeureDate.SelectedDate = (DpHeureDate.SelectedDate ?? DateTime.Today).AddDays(-1);
+        RefreshHeure();
+    }
+
+    private void OnHeureSuivClick(object sender, RoutedEventArgs e)
+    {
+        DpHeureDate.SelectedDate = (DpHeureDate.SelectedDate ?? DateTime.Today).AddDays(1);
+        RefreshHeure();
+    }
+
+    private void RefreshHeure()
+    {
+        if (CmdSiteHeure.SelectedItem is not string site || string.IsNullOrWhiteSpace(site))
+        {
+            ChartHeure.Items = Array.Empty<StackedBarItem>();
+            TxtHeureEntrant.Text = TxtHeureSortant.Text = TxtHeureTotal.Text = "0";
+            return;
+        }
+
+        var date = DpHeureDate.SelectedDate ?? DateTime.Today;
+        var dateIso = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        var counts = _main.Repository.CountByHour(site, dateIso);
+        var entrant = new int[24];
+        var sortant = new int[24];
+        foreach (var c in counts)
+        {
+            if (c.Hour < 0 || c.Hour > 23)
+                continue;
+            entrant[c.Hour] = c.Entrant;
+            sortant[c.Hour] = c.Sortant;
+        }
+
+        var items = new List<StackedBarItem>(24);
+        int totalEntrant = 0, totalSortant = 0;
+        for (int h = 0; h < 24; h++)
+        {
+            items.Add(new StackedBarItem(h.ToString("00") + "h", entrant[h], sortant[h]));
+            totalEntrant += entrant[h];
+            totalSortant += sortant[h];
+        }
+
+        ChartHeure.Items = items;
+        TxtHeureEntrant.Text = totalEntrant.ToString(CultureInfo.InvariantCulture);
+        TxtHeureSortant.Text = totalSortant.ToString(CultureInfo.InvariantCulture);
+        TxtHeureTotal.Text = (totalEntrant + totalSortant).ToString(CultureInfo.InvariantCulture);
     }
 
     private static string FormatDay(string dateIso)

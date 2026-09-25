@@ -434,6 +434,38 @@ ORDER BY DateIso;";
         return list;
     }
 
+    /// <summary>Nombre d'appels entrants/sortants par heure (0-23) pour un site et un jour donnes.</summary>
+    public List<HourCount> CountByHour(string site, string dateIso)
+    {
+        var list = new List<HourCount>();
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+SELECT substr(HeureDebut, 1, 2) AS H,
+       SUM(CASE WHEN (InfoCode % 10) IN (1, 3, 5, 7) THEN 1 ELSE 0 END) AS Entrant,
+       SUM(CASE WHEN (InfoCode % 10) IN (2, 4, 6, 8, 9, 0) THEN 1 ELSE 0 END) AS Sortant
+FROM Cdr
+WHERE Site = $site AND DateIso = $date
+  AND HeureDebut IS NOT NULL AND length(HeureDebut) >= 2
+GROUP BY H
+ORDER BY H;";
+        cmd.Parameters.AddWithValue("$site", site);
+        cmd.Parameters.AddWithValue("$date", dateIso);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (reader.IsDBNull(0) || !int.TryParse(reader.GetString(0), out var hour))
+                continue;
+
+            list.Add(new HourCount(
+                hour,
+                reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                reader.IsDBNull(2) ? 0 : reader.GetInt32(2)));
+        }
+
+        return list;
+    }
+
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,

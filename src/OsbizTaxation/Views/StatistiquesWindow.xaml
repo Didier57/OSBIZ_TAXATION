@@ -42,9 +42,33 @@
                     <helpers:StackedBarChart x:Name="Chart" Grid.Row="1" Margin="0,12,0,0" />
                 </Grid>
             </TabItem>
+
             <TabItem Header="Nb Appels/Heure">
-                <TextBlock Text="&#192; venir" Margin="12" />
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <TextBlock Text="S&#233;lectionner le site" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ComboBox x:Name="CmdSiteHeure" Width="150" SelectionChanged="OnHeureFilterChanged" />
+                        <Button x:Name="BtnHeurePrec" Content="&#x25C4;" Width="34" Margin="10,0,0,0" Click="OnHeurePrecClick" ToolTip="Jour pr&#233;c&#233;dent" />
+                        <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,6,0" />
+                        <DatePicker x:Name="DpHeureDate" Width="140" SelectedDateChanged="OnHeureDateChanged" />
+                        <Button x:Name="BtnHeureSuiv" Content="&#x25BA;" Width="34" Margin="6,0,0,0" Click="OnHeureSuivClick" ToolTip="Jour suivant" />
+                        <TextBlock Text="Total Entrant" VerticalAlignment="Center" Margin="28,0,6,0" />
+                        <TextBox x:Name="TxtHeureEntrant" Width="60" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="Total Sortant" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <TextBox x:Name="TxtHeureSortant" Width="60" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="Total d'appels" VerticalAlignment="Center" Margin="16,0,6,0" />
+                        <TextBox x:Name="TxtHeureTotal" Width="60" IsReadOnly="True" TextAlignment="Center" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <helpers:StackedBarChart x:Name="ChartHeure" Grid.Row="1" Margin="0,12,0,0" />
+                </Grid>
             </TabItem>
+
             <TabItem Header="TOP Dur&#233;e">
                 <TextBlock Text="&#192; venir" Margin="12" />
             </TabItem>
