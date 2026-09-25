@@ -46,6 +46,9 @@ public static class ConfigService
                 AutoTransferIntervalMinutes = config.AutoTransferIntervalMinutes,
                 DernierDossier = config.DernierDossier,
                 Theme = config.Theme,
+                ColumnWidths = config.ColumnWidths.ToDictionary(
+                    pair => pair.Key,
+                    pair => new Dictionary<string, double>(pair.Value)),
                 Sites = config.Sites.Select(s => new SiteConfig
                 {
                     Nom = s.Nom,

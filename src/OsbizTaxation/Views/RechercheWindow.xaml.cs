@@ -36,6 +36,8 @@ public partial class RechercheWindow : Window
 
         GridResultats.ItemsSource = Resultats;
         ExcelFilter.Attach(GridResultats);
+        GridColumnWidths.Apply(GridResultats, WidthsFor("GridResultats"));
+        Closed += (_, _) => SaveColumnWidths();
 
         _initialise = false;
         RunSearch();
@@ -199,4 +201,21 @@ public partial class RechercheWindow : Window
     }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();
+
+    private void SaveColumnWidths()
+    {
+        GridColumnWidths.Capture(GridResultats, WidthsFor("GridResultats"));
+        ConfigService.Save(_main.Config);
+    }
+
+    private Dictionary<string, double> WidthsFor(string grid)
+    {
+        if (!_main.Config.ColumnWidths.TryGetValue(grid, out var widths))
+        {
+            widths = new Dictionary<string, double>();
+            _main.Config.ColumnWidths[grid] = widths;
+        }
+
+        return widths;
+    }
 }

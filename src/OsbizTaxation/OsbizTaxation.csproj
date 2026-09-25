@@ -9,10 +9,10 @@
     <RootNamespace>OsbizTaxation</RootNamespace>
     <AssemblyName>OsbizTaxation</AssemblyName>
 
-    <Version>1.2.6</Version>
-    <FileVersion>1.2.6.0</FileVersion>
-    <AssemblyVersion>1.2.6.0</AssemblyVersion>
-    <InformationalVersion>1.2.6</InformationalVersion>
+    <Version>1.2.7</Version>
+    <FileVersion>1.2.7.0</FileVersion>
+    <AssemblyVersion>1.2.7.0</AssemblyVersion>
+    <InformationalVersion>1.2.7</InformationalVersion>
     <Product>OSBIZ TAXATION</Product>
     <Company>Didier57</Company>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>

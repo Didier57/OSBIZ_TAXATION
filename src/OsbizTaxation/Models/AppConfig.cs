@@ -17,4 +17,7 @@ public sealed class AppConfig
 
     /// <summary>Theme de l'interface : "Clair" ou "Sombre".</summary>
     public string Theme { get; set; } = "Clair";
+
+    /// <summary>Largeur memorisee des colonnes, par nom de table puis par nom de colonne.</summary>
+    public Dictionary<string, Dictionary<string, double>> ColumnWidths { get; set; } = new();
 }

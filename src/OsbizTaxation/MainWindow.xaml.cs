@@ -17,6 +17,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         Title = $"Taxation OSBIZ  ({_viewModel.Version})";
         UpdateThemeUi();
+        GridColumnWidths.Apply(GridCdr, WidthsFor("GridCdr"));
         SourceInitialized += (_, _) => TitleBarTheme.Apply(this);
         Loaded += OnLoaded;
         Closed += OnClosed;
@@ -46,7 +47,22 @@ public partial class MainWindow : Window
         => await _viewModel.CheckUpdatesOnStartupAsync();
 
     private void OnClosed(object? sender, EventArgs e)
-        => _viewModel.Dispose();
+    {
+        GridColumnWidths.Capture(GridCdr, WidthsFor("GridCdr"));
+        ConfigService.Save(_viewModel.Config);
+        _viewModel.Dispose();
+    }
+
+    private Dictionary<string, double> WidthsFor(string grid)
+    {
+        if (!_viewModel.Config.ColumnWidths.TryGetValue(grid, out var widths))
+        {
+            widths = new Dictionary<string, double>();
+            _viewModel.Config.ColumnWidths[grid] = widths;
+        }
+
+        return widths;
+    }
 
     private void OnQuitClick(object sender, RoutedEventArgs e) => Close();
 

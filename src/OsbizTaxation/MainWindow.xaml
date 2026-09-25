@@ -69,7 +69,7 @@
                   HeadersVisibility="Column"
                   SelectionMode="Extended"
                   SelectionUnit="FullRow"
-                  GridLinesVisibility="Horizontal"
+                  GridLinesVisibility="All"
                   EnableRowVirtualization="True"
                   FrozenColumnCount="1">
             <DataGrid.RowStyle>

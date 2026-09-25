@@ -17,7 +17,7 @@
     <SolidColorBrush x:Key="Brush.Header.Foreground" Color="#FF1F1F1F" />
     <SolidColorBrush x:Key="Brush.Selection.Background" Color="#FFCCE4F7" />
     <SolidColorBrush x:Key="Brush.Selection.Foreground" Color="#FF000000" />
-    <SolidColorBrush x:Key="Brush.Grid.Line" Color="#FFDCDCDC" />
+    <SolidColorBrush x:Key="Brush.Grid.Line" Color="#FFB8B8B8" />
     <SolidColorBrush x:Key="Brush.Filter.Icon" Color="#FF333333" />
     <SolidColorBrush x:Key="Brush.Filter.Active" Color="#FF0B66C3" />
     <SolidColorBrush x:Key="Brush.Input.Background" Color="#FFFFFFFF" />

@@ -60,7 +60,7 @@
                   CanUserAddRows="False"
                   HeadersVisibility="Column"
                   SelectionUnit="FullRow"
-                  GridLinesVisibility="Horizontal"
+                  GridLinesVisibility="All"
                   EnableRowVirtualization="True">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
