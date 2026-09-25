@@ -65,8 +65,17 @@ public static class ColumnManager
             Margin = new Thickness(4)
         };
         var template = new DataTemplate();
-        var row = new FrameworkElementFactory(typeof(StackPanel));
-        row.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+        var row = new FrameworkElementFactory(typeof(Grid));
+        var colAuto = new FrameworkElementFactory(typeof(ColumnDefinition));
+        colAuto.SetValue(ColumnDefinition.WidthProperty, GridLength.Auto);
+        var colFill = new FrameworkElementFactory(typeof(ColumnDefinition));
+        colFill.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+        var colGrip = new FrameworkElementFactory(typeof(ColumnDefinition));
+        colGrip.SetValue(ColumnDefinition.WidthProperty, GridLength.Auto);
+        row.AppendChild(colAuto);
+        row.AppendChild(colFill);
+        row.AppendChild(colGrip);
+
         var check = new FrameworkElementFactory(typeof(CheckBox));
         check.SetBinding(ToggleButton.IsCheckedProperty, new Binding(nameof(ColumnItem.IsVisible))
         {
@@ -75,11 +84,26 @@ public static class ColumnManager
         });
         check.SetValue(FrameworkElement.MarginProperty, new Thickness(4, 2, 8, 2));
         check.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+        check.SetValue(Grid.ColumnProperty, 0);
+
         var text = new FrameworkElementFactory(typeof(TextBlock));
         text.SetBinding(TextBlock.TextProperty, new Binding(nameof(ColumnItem.Title)));
         text.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+        text.SetValue(Grid.ColumnProperty, 1);
+
+        var grip = new FrameworkElementFactory(typeof(System.Windows.Shapes.Path));
+        grip.SetValue(System.Windows.Shapes.Path.DataProperty, Geometry.Parse("M0,1 H12 M0,6 H12"));
+        grip.SetValue(System.Windows.Shapes.Path.StrokeProperty, new SolidColorBrush(Color.FromRgb(0x90, 0x90, 0x90)));
+        grip.SetValue(System.Windows.Shapes.Path.StrokeThicknessProperty, 2.0);
+        grip.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+        grip.SetValue(FrameworkElement.MarginProperty, new Thickness(10, 0, 8, 0));
+        grip.SetValue(FrameworkElement.CursorProperty, Cursors.SizeAll);
+        grip.SetValue(FrameworkElement.ToolTipProperty, "Glisser pour déplacer");
+        grip.SetValue(Grid.ColumnProperty, 2);
+
         row.AppendChild(check);
         row.AppendChild(text);
+        row.AppendChild(grip);
         template.VisualTree = row;
         list.ItemTemplate = template;
         list.ItemsSource = items;
