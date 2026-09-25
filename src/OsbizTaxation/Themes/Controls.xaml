@@ -479,6 +479,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Control.Border}" />
         <Setter Property="RowBackground" Value="Transparent" />
         <Setter Property="AlternatingRowBackground" Value="{x:Null}" />
+        <Setter Property="GridLinesVisibility" Value="All" />
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Brush.Grid.Line}" />
         <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Brush.Grid.Line}" />
     </Style>
