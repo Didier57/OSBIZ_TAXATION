@@ -552,6 +552,36 @@ ORDER BY Total DESC, Pays;";
         return list;
     }
 
+    /// <summary>Comptage des appels par site, type d'appel et date, pour construire le TCD.</summary>
+    public List<PivotCall> GetPivotCalls(string? site, string dateIsoDebut, string dateIsoFin)
+    {
+        var list = new List<PivotCall>();
+        var siteFilter = string.IsNullOrWhiteSpace(site) ? "" : "\n  AND Site = $site";
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = $@"
+SELECT Site, Information, DateIso, COUNT(*) AS Total
+FROM Cdr
+WHERE DateIso >= $debut AND DateIso <= $fin{siteFilter}
+GROUP BY Site, Information, DateIso;";
+        cmd.Parameters.AddWithValue("$debut", dateIsoDebut);
+        cmd.Parameters.AddWithValue("$fin", dateIsoFin);
+        if (!string.IsNullOrWhiteSpace(site))
+            cmd.Parameters.AddWithValue("$site", site);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new PivotCall(
+                reader.IsDBNull(0) ? "" : reader.GetString(0),
+                reader.IsDBNull(1) ? "" : reader.GetString(1),
+                reader.IsDBNull(2) ? "" : reader.GetString(2),
+                reader.IsDBNull(3) ? 0 : reader.GetInt32(3)));
+        }
+
+        return list;
+    }
+
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,

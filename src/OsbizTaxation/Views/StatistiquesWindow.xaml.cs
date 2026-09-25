@@ -1,8 +1,12 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.Win32;
 using OsbizTaxation.Helpers;
+using OsbizTaxation.Models;
+using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
 
 namespace OsbizTaxation.Views;
@@ -30,12 +34,14 @@ public partial class StatistiquesWindow : Window
 
         var today = DateTime.Today;
 
+        CmdTcdSite.Items.Add("(tous les sites)");
         foreach (var site in main.Config.Sites)
         {
             CmdSite.Items.Add(site.Nom);
             CmdSiteHeure.Items.Add(site.Nom);
             CmdTopSite.Items.Add(site.Nom);
             CmdPaysSite.Items.Add(site.Nom);
+            CmdTcdSite.Items.Add(site.Nom);
         }
 
         if (CmdSite.Items.Count > 0)
@@ -46,6 +52,8 @@ public partial class StatistiquesWindow : Window
             CmdTopSite.SelectedIndex = 0;
         if (CmdPaysSite.Items.Count > 0)
             CmdPaysSite.SelectedIndex = 0;
+        if (CmdTcdSite.Items.Count > 0)
+            CmdTcdSite.SelectedIndex = 0;
 
         PopulateYears(today.Year);
 
@@ -66,11 +74,14 @@ public partial class StatistiquesWindow : Window
         CmdPaysType.SelectedIndex = 0;
         DpPaysDate.SelectedDate = today;
 
+        PopulateTcdYears(today.Year);
+
         _initialise = false;
         Refresh();
         RefreshHeure();
         RefreshTop();
         RefreshPays();
+        RefreshTcd();
     }
 
     private void PopulateYears(int defaultYear)
@@ -95,6 +106,27 @@ public partial class StatistiquesWindow : Window
         CmdAnnee.SelectedItem = wanted;
         if (CmdAnnee.SelectedIndex < 0 && CmdAnnee.Items.Count > 0)
             CmdAnnee.SelectedIndex = CmdAnnee.Items.Count - 1;
+    }
+
+    private void PopulateTcdYears(int defaultYear)
+    {
+        var years = new List<int>();
+        foreach (var y in _main.Repository.GetYears(null))
+            if (int.TryParse(y, out var v) && !years.Contains(v))
+                years.Add(v);
+
+        if (!years.Contains(defaultYear))
+            years.Add(defaultYear);
+        years.Sort();
+
+        CmdTcdAnnee.Items.Clear();
+        foreach (var y in years)
+            CmdTcdAnnee.Items.Add(y.ToString(CultureInfo.InvariantCulture));
+
+        var wanted = defaultYear.ToString(CultureInfo.InvariantCulture);
+        CmdTcdAnnee.SelectedItem = wanted;
+        if (CmdTcdAnnee.SelectedIndex < 0 && CmdTcdAnnee.Items.Count > 0)
+            CmdTcdAnnee.SelectedIndex = CmdTcdAnnee.Items.Count - 1;
     }
 
     private void OnFilterChanged(object sender, SelectionChangedEventArgs e)
@@ -393,10 +425,80 @@ public partial class StatistiquesWindow : Window
 
         var items = new List<BarItem>(rows.Count);
         foreach (var r in rows)
-            items.Add(new BarItem(string.IsNullOrWhiteSpace(r.Pays) ? "(Local)" : r.Pays, r.Total));
+            if (!string.IsNullOrWhiteSpace(r.Pays))
+                items.Add(new BarItem(r.Pays, r.Total));
 
         ChartPays.Items = items;
         ChartPays.Title = "Appel par pays";
+    }
+
+    private void OnTcdFilterChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initialise)
+            return;
+        RefreshTcd();
+    }
+
+    private void RefreshTcd()
+    {
+        if (CmdTcdAnnee.SelectedItem is not string annee || !int.TryParse(annee, out var year))
+        {
+            Tcd.SetData(Array.Empty<PivotCall>(), "");
+            return;
+        }
+
+        var begin = new DateTime(year, 1, 1);
+        var end = new DateTime(year, 12, 31);
+        string? site = CmdTcdSite.SelectedIndex > 0 ? CmdTcdSite.SelectedItem as string : null;
+
+        var data = _main.Repository.GetPivotCalls(site, Iso(begin), Iso(end));
+        Tcd.SetData(data, annee);
+    }
+
+    private void OnTcdExportClick(object sender, RoutedEventArgs e)
+    {
+        var grid = Tcd.BuildExport();
+        if (grid is null || grid.Rows.Count == 0)
+        {
+            MessageBox.Show("Aucune donnée à exporter.", "TCD", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var annee = CmdTcdAnnee.SelectedItem as string ?? "";
+        var dialog = new SaveFileDialog
+        {
+            Filter = "Classeur Excel (*.xlsx)|*.xlsx",
+            FileName = $"TCD_{annee}.xlsx",
+            InitialDirectory = AppPaths.AppDirectory
+        };
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        try
+        {
+            ExcelExporter.Export(dialog.FileName, grid, "TCD");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Export impossible : " + ex.Message, "TCD", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (MessageBox.Show($"Tableau exporté vers :\n{dialog.FileName}\n\nVoulez-vous ouvrir le fichier ?",
+                "TCD", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            OuvrirFichier(dialog.FileName);
+    }
+
+    private static void OuvrirFichier(string filePath)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Impossible d'ouvrir le fichier : " + ex.Message, "TCD", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void OnFermerClick(object sender, RoutedEventArgs e) => Close();

@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using OsbizTaxation.Models;
 
 namespace OsbizTaxation.Services;
 
@@ -40,6 +42,20 @@ public static class ExcelExporter
         AddEntry(zip, "xl/_rels/workbook.xml.rels", WorkbookRels());
         AddEntry(zip, "xl/styles.xml", Styles(fills));
         AddEntry(zip, "xl/worksheets/sheet1.xml", Sheet(headers, rows, fillIndex));
+    }
+
+    /// <summary>Ecrit une grille generique (TCD) avec cellules fusionnees et numeros.</summary>
+    public static void Export(string filePath, ExcelGrid grid, string sheetName = "Feuille1")
+    {
+        using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        using var zip = new ZipArchive(stream, ZipArchiveMode.Create);
+
+        AddEntry(zip, "[Content_Types].xml", ContentTypes());
+        AddEntry(zip, "_rels/.rels", RootRels());
+        AddEntry(zip, "xl/workbook.xml", Workbook(sheetName));
+        AddEntry(zip, "xl/_rels/workbook.xml.rels", WorkbookRels());
+        AddEntry(zip, "xl/styles.xml", StylesGrid());
+        AddEntry(zip, "xl/worksheets/sheet1.xml", SheetGrid(grid));
     }
 
     private static void AddEntry(ZipArchive zip, string name, string content)
@@ -147,6 +163,101 @@ public static class ExcelExporter
         }
 
         sb.Append("</sheetData></worksheet>");
+        return sb.ToString();
+    }
+
+    private static string StylesGrid()
+    {
+        var sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+        sb.Append($"<styleSheet xmlns=\"{Ns}\">");
+
+        sb.Append("<fonts count=\"2\">");
+        sb.Append("<font><sz val=\"11\"/><name val=\"Calibri\"/></font>");
+        sb.Append("<font><b/><sz val=\"11\"/><name val=\"Calibri\"/></font>");
+        sb.Append("</fonts>");
+
+        sb.Append("<fills count=\"3\">");
+        sb.Append("<fill><patternFill patternType=\"none\"/></fill>");
+        sb.Append("<fill><patternFill patternType=\"gray125\"/></fill>");
+        sb.Append("<fill><patternFill patternType=\"solid\"><fgColor rgb=\"FFD9D9D9\"/><bgColor indexed=\"64\"/></patternFill></fill>");
+        sb.Append("</fills>");
+
+        sb.Append("<borders count=\"2\">");
+        sb.Append("<border><left/><right/><top/><bottom/><diagonal/></border>");
+        sb.Append("<border><left style=\"thin\"><color rgb=\"FFBFBFBF\"/></left><right style=\"thin\"><color rgb=\"FFBFBFBF\"/></right>"
+                + "<top style=\"thin\"><color rgb=\"FFBFBFBF\"/></top><bottom style=\"thin\"><color rgb=\"FFBFBFBF\"/></bottom><diagonal/></border>");
+        sb.Append("</borders>");
+
+        sb.Append("<cellStyleXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\"/></cellStyleXfs>");
+
+        sb.Append("<cellXfs count=\"5\">");
+        sb.Append("<xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"1\" xfId=\"0\" applyBorder=\"1\"/>");
+        sb.Append("<xf numFmtId=\"0\" fontId=\"1\" fillId=\"0\" borderId=\"1\" xfId=\"0\" applyFont=\"1\" applyBorder=\"1\"/>");
+        sb.Append("<xf numFmtId=\"0\" fontId=\"1\" fillId=\"2\" borderId=\"1\" xfId=\"0\" applyFont=\"1\" applyFill=\"1\" applyBorder=\"1\" applyAlignment=\"1\"><alignment horizontal=\"center\" vertical=\"center\" wrapText=\"1\"/></xf>");
+        sb.Append("<xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"1\" xfId=\"0\" applyBorder=\"1\" applyAlignment=\"1\"><alignment horizontal=\"right\"/></xf>");
+        sb.Append("<xf numFmtId=\"0\" fontId=\"1\" fillId=\"0\" borderId=\"1\" xfId=\"0\" applyFont=\"1\" applyBorder=\"1\" applyAlignment=\"1\"><alignment horizontal=\"right\"/></xf>");
+        sb.Append("</cellXfs>");
+
+        sb.Append("<cellStyles count=\"1\"><cellStyle name=\"Normal\" xfId=\"0\" builtinId=\"0\"/></cellStyles>");
+        sb.Append("</styleSheet>");
+        return sb.ToString();
+    }
+
+    private static string SheetGrid(ExcelGrid grid)
+    {
+        var sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+        sb.Append($"<worksheet xmlns=\"{Ns}\">");
+
+        if (grid.ColumnCount > 0)
+        {
+            sb.Append("<cols>");
+            for (var i = 0; i < grid.ColumnCount; i++)
+            {
+                var width = grid.ColumnWidths.TryGetValue(i, out var w) ? w : grid.DefaultColumnWidth;
+                var number = i + 1;
+                sb.Append($"<col min=\"{number}\" max=\"{number}\" width=\"{width.ToString(CultureInfo.InvariantCulture)}\" customWidth=\"1\"/>");
+            }
+            sb.Append("</cols>");
+        }
+
+        sb.Append("<sheetData>");
+        for (var r = 0; r < grid.Rows.Count; r++)
+        {
+            var row = grid.Rows[r];
+            var rowNumber = r + 1;
+            sb.Append($"<row r=\"{rowNumber}\">");
+            for (var c = 0; c < row.Count; c++)
+            {
+                var cell = row[c];
+                var reference = $"{ColumnName(c)}{rowNumber}";
+                var style = cell.Header ? 2 : cell.Number.HasValue ? (cell.Bold ? 4 : 3) : (cell.Bold ? 1 : 0);
+
+                if (cell.Number.HasValue)
+                    sb.Append($"<c r=\"{reference}\" s=\"{style}\"><v>{cell.Number.Value.ToString(CultureInfo.InvariantCulture)}</v></c>");
+                else if (!string.IsNullOrEmpty(cell.Text))
+                    sb.Append($"<c r=\"{reference}\" s=\"{style}\" t=\"inlineStr\"><is><t xml:space=\"preserve\">{Escape(cell.Text)}</t></is></c>");
+                else
+                    sb.Append($"<c r=\"{reference}\" s=\"{style}\"/>");
+            }
+            sb.Append("</row>");
+        }
+        sb.Append("</sheetData>");
+
+        if (grid.Merges.Count > 0)
+        {
+            sb.Append($"<mergeCells count=\"{grid.Merges.Count}\">");
+            foreach (var (row, col, rowSpan, colSpan) in grid.Merges)
+            {
+                var from = $"{ColumnName(col)}{row + 1}";
+                var to = $"{ColumnName(col + colSpan - 1)}{row + rowSpan}";
+                sb.Append($"<mergeCell ref=\"{from}:{to}\"/>");
+            }
+            sb.Append("</mergeCells>");
+        }
+
+        sb.Append("</worksheet>");
         return sb.ToString();
     }
 
