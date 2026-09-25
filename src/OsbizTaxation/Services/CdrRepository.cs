@@ -380,6 +380,60 @@ WHERE Site = $site
         cmd.ExecuteNonQuery();
     }
 
+    /// <summary>Annees pour lesquelles des appels existent (pour un site, ou tous les sites si null).</summary>
+    public List<string> GetYears(string? site)
+    {
+        var list = new List<string>();
+        using var cmd = _connection.CreateCommand();
+        if (string.IsNullOrWhiteSpace(site))
+        {
+            cmd.CommandText = "SELECT DISTINCT substr(DateIso, 1, 4) FROM Cdr WHERE DateIso IS NOT NULL AND DateIso <> '' ORDER BY 1;";
+        }
+        else
+        {
+            cmd.CommandText = "SELECT DISTINCT substr(DateIso, 1, 4) FROM Cdr WHERE DateIso IS NOT NULL AND DateIso <> '' AND Site = $site ORDER BY 1;";
+            cmd.Parameters.AddWithValue("$site", site.Trim());
+        }
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (!reader.IsDBNull(0) && reader.GetString(0).Length == 4)
+                list.Add(reader.GetString(0));
+        }
+
+        return list;
+    }
+
+    /// <summary>Nombre d'appels entrants/sortants par jour sur une periode (dates ISO incluses).</summary>
+    public List<DailyCount> CountByDay(string site, string dateIsoDebut, string dateIsoFin)
+    {
+        var list = new List<DailyCount>();
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+SELECT DateIso,
+       SUM(CASE WHEN (InfoCode % 10) IN (1, 3, 5, 7) THEN 1 ELSE 0 END) AS Entrant,
+       SUM(CASE WHEN (InfoCode % 10) IN (2, 4, 6, 8, 9, 0) THEN 1 ELSE 0 END) AS Sortant
+FROM Cdr
+WHERE Site = $site AND DateIso >= $debut AND DateIso <= $fin
+GROUP BY DateIso
+ORDER BY DateIso;";
+        cmd.Parameters.AddWithValue("$site", site);
+        cmd.Parameters.AddWithValue("$debut", dateIsoDebut);
+        cmd.Parameters.AddWithValue("$fin", dateIsoFin);
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new DailyCount(
+                reader.IsDBNull(0) ? "" : reader.GetString(0),
+                reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                reader.IsDBNull(2) ? 0 : reader.GetInt32(2)));
+        }
+
+        return list;
+    }
+
     private const string SelectColumns = @"
 SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,

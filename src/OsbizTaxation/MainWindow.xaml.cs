@@ -72,9 +72,8 @@ public partial class MainWindow : Window
 
     private void OnStatistiquesClick(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show(
-            "Le module de statistiques sera disponible dans une prochaine version.",
-            "Statistiques", MessageBoxButton.OK, MessageBoxImage.Information);
+        var window = new StatistiquesWindow(_viewModel) { Owner = this };
+        window.ShowDialog();
     }
 
     private void OnImportExportClick(object sender, RoutedEventArgs e)
