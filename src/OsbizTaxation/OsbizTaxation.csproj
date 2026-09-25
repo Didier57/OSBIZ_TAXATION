@@ -29,4 +29,10 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
   </ItemGroup>
 
+  <!-- Utilise NLS de Windows (au lieu d'ICU) pour obtenir les noms de pays
+       traduits dans la langue du systeme (ici le francais). -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.UseNls" Value="true" />
+  </ItemGroup>
+
 </Project>

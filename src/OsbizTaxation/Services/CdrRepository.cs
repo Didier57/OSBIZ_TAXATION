@@ -23,6 +23,7 @@ public sealed class CdrRepository : IDisposable
 CREATE TABLE IF NOT EXISTS Cdr (
     Id                 INTEGER PRIMARY KEY AUTOINCREMENT,
     Site               TEXT,
+    Pays               TEXT,
     Date               TEXT,
     DateIso            TEXT,
     HeureDebut         TEXT,
@@ -45,6 +46,24 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_Date ON Cdr(DateIso);
 CREATE INDEX IF NOT EXISTS IX_Cdr_Site ON Cdr(Site);
 CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         cmd.ExecuteNonQuery();
+
+        EnsureColumn("Pays", "TEXT");
+    }
+
+    /// <summary>Ajoute une colonne si la base existante ne la contient pas encore (migration).</summary>
+    private void EnsureColumn(string name, string type)
+    {
+        using (var check = _connection.CreateCommand())
+        {
+            check.CommandText = "SELECT 1 FROM pragma_table_info('Cdr') WHERE name = $name;";
+            check.Parameters.AddWithValue("$name", name);
+            if (check.ExecuteScalar() != null)
+                return;
+        }
+
+        using var alter = _connection.CreateCommand();
+        alter.CommandText = $"ALTER TABLE Cdr ADD COLUMN {name} {type};";
+        alter.ExecuteNonQuery();
     }
 
     public int Insert(IEnumerable<CdrRecord> records)
@@ -57,14 +76,15 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         using var cmd = _connection.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = @"
-INSERT INTO Cdr (Site, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
+INSERT INTO Cdr (Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
                  DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
                  DureeAppelSecondes, RawLine, SourceFile, DateTransfert)
-VALUES ($site, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne,
+VALUES ($site, $pays, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne,
         $sonnerie, $duree, $externe, $info, $infoCode, $extra,
         $secondes, $raw, $source, $transfert);";
 
         var pSite = cmd.Parameters.Add("$site", SqliteType.Text);
+        var pPays = cmd.Parameters.Add("$pays", SqliteType.Text);
         var pDate = cmd.Parameters.Add("$date", SqliteType.Text);
         var pDateIso = cmd.Parameters.Add("$dateIso", SqliteType.Text);
         var pDebut = cmd.Parameters.Add("$debut", SqliteType.Text);
@@ -87,6 +107,7 @@ VALUES ($site, $date, $dateIso, $debut, $fin, $ligne, $nomLigne, $interne,
         foreach (var r in list)
         {
             pSite.Value = r.Site;
+            pPays.Value = r.Pays;
             pDate.Value = r.Date;
             pDateIso.Value = r.DateIso;
             pDebut.Value = r.HeureDebut;
@@ -210,7 +231,7 @@ WHERE Site = $site
     }
 
     private const string SelectColumns = @"
-SELECT Id, Site, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
+SELECT Id, Site, Pays, Date, DateIso, HeureDebut, HeureFin, Ligne, NomLigne, NumeroInterne,
        DureeSonnerie, DureeAppel, NumeroExterne, Information, InfoCode, NumeroExtra,
        DureeAppelSecondes, RawLine, SourceFile, DateTransfert
 FROM Cdr";
@@ -225,23 +246,24 @@ FROM Cdr";
             {
                 Id = reader.GetInt64(0),
                 Site = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                Date = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                DateIso = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                HeureDebut = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                HeureFin = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                Ligne = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                NomLigne = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                NumeroInterne = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                DureeSonnerie = reader.IsDBNull(9) ? "" : reader.GetString(9),
-                DureeAppel = reader.IsDBNull(10) ? "" : reader.GetString(10),
-                NumeroExterne = reader.IsDBNull(11) ? "" : reader.GetString(11),
-                Information = reader.IsDBNull(12) ? "" : reader.GetString(12),
-                InfoCode = reader.IsDBNull(13) ? 0 : reader.GetInt32(13),
-                NumeroExtra = reader.IsDBNull(14) ? "" : reader.GetString(14),
-                DureeAppelSecondes = reader.IsDBNull(15) ? 0 : reader.GetInt32(15),
-                RawLine = reader.IsDBNull(16) ? "" : reader.GetString(16),
-                SourceFile = reader.IsDBNull(17) ? "" : reader.GetString(17),
-                DateTransfert = reader.IsDBNull(18) ? "" : reader.GetString(18)
+                Pays = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                Date = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                DateIso = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                HeureDebut = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                HeureFin = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                Ligne = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                NomLigne = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                NumeroInterne = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                DureeSonnerie = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                DureeAppel = reader.IsDBNull(11) ? "" : reader.GetString(11),
+                NumeroExterne = reader.IsDBNull(12) ? "" : reader.GetString(12),
+                Information = reader.IsDBNull(13) ? "" : reader.GetString(13),
+                InfoCode = reader.IsDBNull(14) ? 0 : reader.GetInt32(14),
+                NumeroExtra = reader.IsDBNull(15) ? "" : reader.GetString(15),
+                DureeAppelSecondes = reader.IsDBNull(16) ? 0 : reader.GetInt32(16),
+                RawLine = reader.IsDBNull(17) ? "" : reader.GetString(17),
+                SourceFile = reader.IsDBNull(18) ? "" : reader.GetString(18),
+                DateTransfert = reader.IsDBNull(19) ? "" : reader.GetString(19)
             });
         }
 

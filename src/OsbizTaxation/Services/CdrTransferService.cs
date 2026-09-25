@@ -34,7 +34,8 @@ public sealed class CdrTransferService
             log.Report($"[{site.Nom}] Aucune donnee renvoyee par le PBX.");
         }
 
-        var records = CdrParser.Parse(content, site.Nom, Path.GetFileName(rawPath) ?? string.Empty, config.Lignes);
+        var pays = Countries.NameFor(site.PaysCode);
+        var records = CdrParser.Parse(content, site.Nom, pays, Path.GetFileName(rawPath) ?? string.Empty, config.Lignes);
         var horodatage = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         foreach (var record in records)
             record.DateTransfert = horodatage;

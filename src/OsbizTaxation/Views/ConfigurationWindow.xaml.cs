@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using OsbizTaxation.Models;
 using OsbizTaxation.Services;
 using OsbizTaxation.ViewModels;
@@ -26,6 +27,52 @@ public partial class ConfigurationWindow : Window
         _viewModel.Sites.Add(site);
         GridSites.SelectedItem = site;
         GridSites.ScrollIntoView(site);
+    }
+
+    private async void OnTesterSiteClick(object sender, RoutedEventArgs e)
+    {
+        if (GridSites.SelectedItem is not SiteConfig site)
+        {
+            Warn("Selectionnez un site a tester.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(site.Adresse))
+        {
+            Warn("L'adresse du site est vide.");
+            return;
+        }
+
+        BtnTesterSite.IsEnabled = false;
+        try
+        {
+            using var client = new OpenScapeClient();
+            var contenu = await client.DownloadAsync(site);
+
+            var premiere = (contenu ?? string.Empty)
+                .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .FirstOrDefault(l => l.Length > 0);
+
+            if (premiere is null)
+            {
+                MessageBox.Show("Connexion reussie, mais le fichier renvoye est vide (aucun CDR).",
+                    "Test de connexion", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show($"Connexion reussie.\n\nPremiere ligne du fichier :\n{premiere}",
+                    "Test de connexion", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            Warn("Echec du test : " + ex.Message);
+        }
+        finally
+        {
+            BtnTesterSite.IsEnabled = true;
+        }
     }
 
     private void OnSupprimerSiteClick(object sender, RoutedEventArgs e)

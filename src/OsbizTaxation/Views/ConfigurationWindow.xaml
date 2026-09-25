@@ -49,6 +49,7 @@
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                         <Button Content="Ajouter" Padding="14,4" Margin="0,0,8,0" Click="OnAjouterSiteClick" />
+                        <Button x:Name="BtnTesterSite" Content="Tester la connexion" Padding="14,4" Margin="0,0,8,0" Click="OnTesterSiteClick" />
                         <Button Content="Supprimer" Padding="14,4" Click="OnSupprimerSiteClick" />
                     </StackPanel>
                 </Grid>

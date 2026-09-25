@@ -6,6 +6,8 @@ public sealed class CdrRecord
 
     public string Site { get; set; } = string.Empty;
 
+    public string Pays { get; set; } = string.Empty;
+
     public string Date { get; set; } = string.Empty;
 
     /// <summary>Date au format ISO (yyyy-MM-dd) pour les tris et filtres.</summary>

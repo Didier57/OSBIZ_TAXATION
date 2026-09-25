@@ -42,6 +42,7 @@
                   FrozenColumnCount="1">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Site" Binding="{Binding Site}" Width="90" />
+                <DataGridTextColumn Header="Pays" Binding="{Binding Pays}" Width="110" />
                 <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="90" />
                 <DataGridTextColumn Header="Heure D&#233;but" Binding="{Binding HeureDebut}" Width="90" />
                 <DataGridTextColumn Header="Heure Fin" Binding="{Binding HeureFin}" Width="90" />

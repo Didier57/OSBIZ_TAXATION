@@ -34,6 +34,7 @@ public static class CdrParser
     public static List<CdrRecord> Parse(
         string content,
         string site,
+        string pays,
         string sourceFile,
         IReadOnlyList<LineConfig> lignes)
     {
@@ -54,7 +55,10 @@ public static class CdrParser
 
             var record = ParseLine(trimmed, site, sourceFile, lignes);
             if (record != null)
+            {
+                record.Pays = pays;
                 records.Add(record);
+            }
         }
 
         return records;
