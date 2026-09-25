@@ -54,6 +54,43 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         CreateUniqueRawIndex();
         MigrateInfoLabels();
         RebuildGroups();
+        RecomputeCountries();
+    }
+
+    /// <summary>Attribue le pays de destination aux appels internationaux deja stockes (numeros en 00).</summary>
+    public int RecomputeCountries()
+    {
+        using var tx = _connection.BeginTransaction();
+
+        var updates = new List<(long Id, string Pays)>();
+        using (var select = _connection.CreateCommand())
+        {
+            select.Transaction = tx;
+            select.CommandText = "SELECT Id, NumeroExterne FROM Cdr WHERE NumeroExterne LIKE '00%';";
+            using var reader = select.ExecuteReader();
+            while (reader.Read())
+            {
+                var id = reader.GetInt64(0);
+                var numero = reader.IsDBNull(1) ? null : reader.GetString(1);
+                var pays = PhoneCodes.CountryNameForNumber(numero);
+                if (!string.IsNullOrEmpty(pays))
+                    updates.Add((id, pays));
+            }
+        }
+
+        var total = 0;
+        foreach (var (id, pays) in updates)
+        {
+            using var update = _connection.CreateCommand();
+            update.Transaction = tx;
+            update.CommandText = "UPDATE Cdr SET Pays = $pays WHERE Id = $id AND (Pays IS NULL OR Pays <> $pays);";
+            update.Parameters.AddWithValue("$pays", pays);
+            update.Parameters.AddWithValue("$id", id);
+            total += update.ExecuteNonQuery();
+        }
+
+        tx.Commit();
+        return total;
     }
 
     /// <summary>Met a jour les libelles d'information deja stockes lors d'un renommage.</summary>
