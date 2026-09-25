@@ -50,6 +50,15 @@ CREATE INDEX IF NOT EXISTS IX_Cdr_NumeroExterne ON Cdr(NumeroExterne);";
         EnsureColumn("Pays", "TEXT");
         DeduplicateRawLines();
         CreateUniqueRawIndex();
+        MigrateInfoLabels();
+    }
+
+    /// <summary>Met a jour les libelles d'information deja stockes lors d'un renommage.</summary>
+    private void MigrateInfoLabels()
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "UPDATE Cdr SET Information = 'Entrant Transféré' WHERE Information = 'Entrant route';";
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>Supprime les doublons deja presents (meme site + meme ligne brute).</summary>
