@@ -1,0 +1,16 @@
+## .NET / build
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## Publish output
+publish/
+artifacts/
+
+## Local config / data
+*.log
+
+## Code source prive (non publie sur le depot)
+src/
