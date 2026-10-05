@@ -22,6 +22,7 @@ Elle récupère automatiquement les journaux d'appels (CDR) de chaque site, les 
 
 - Configuration de chaque site : nom, adresse (IP / domaine), identifiants, pays.
 - Déclaration des **plages de numéros internes**, avec **nom de ligne** et **type de ligne** (Externe ou Interne).
+- Marquage des lignes **Provider (fournisseur)** : un appel entrant ou sortant passe nécessairement par une ligne Provider ; seuls ces appels sont pris en compte dans les statistiques.
 - Renommage automatique des lignes sur les appels déjà enregistrés.
 - Détection des **nouveaux numéros** rencontrés lors d'un transfert.
 - Suppression d'un site : l'application propose de supprimer en même temps **ses appels** (base active et archives) et **ses utilisateurs internes**.
@@ -34,6 +35,8 @@ Elle récupère automatiquement les journaux d'appels (CDR) de chaque site, les 
 - Import des **noms des postes depuis le fichier d'export du central** (fichier XML), pour un site choisi : les postes manquants sont créés, les noms existants mis à jour.
 - Bouton **« Supprimer sites inexistants »** pour nettoyer les postes dont le site n'existe plus.
 - Rôles **Utilisateur** / **Gestionnaire** / **Administrateur**, avec **périmètre par site** (un gestionnaire ne voit que les sites qui lui sont attribués).
+- **Activation / désactivation** d'un utilisateur : un utilisateur désactivé n'a plus accès à l'interface web.
+- **Réinitialisation du code PIN** à une valeur par défaut (1234) en un clic, avec confirmation.
 - Sélection multiple dans la liste pour supprimer plusieurs postes d'un coup.
 
 ## Consultation des appels
@@ -53,9 +56,16 @@ Elle récupère automatiquement les journaux d'appels (CDR) de chaque site, les 
 - **Heures de pointe** : carte de chaleur heures × jours de la semaine, répartition par jour et **taux de réponse**.
 - **Top durées** d'appel.
 - Répartition **par pays**.
+- **Période au choix** pour chaque analyse : jour, **semaine**, mois ou année, avec navigation avant / arrière.
 - **Tableau croisé dynamique** (TCD) exportable.
 - **Graphiques interactifs** : un clic sur une barre, une part ou une case affiche la liste des appels correspondants.
 - Impression de chaque analyse en **PDF** avec site, période et totaux.
+
+## Administration de la base de données
+
+- Fenêtre dédiée pour **rechercher des appels** avec les mêmes filtres et le même tri que la recherche : période (jour / mois / année / **tout**), site, filtres façon Excel par colonne et tri.
+- **Sélection multiple** des lignes (surlignage visible) pour agir sur plusieurs appels à la fois.
+- **Suppression des appels erronés** : suppression de la sélection, des résultats affichés, ou **vidage complet de la base** (base active et archive), avec confirmations.
 
 ## Rapports
 
