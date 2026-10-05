@@ -11,7 +11,6 @@ Elle récupère automatiquement les journaux d'appels (CDR) de chaque site, les 
 - Récupération des journaux d'appels (CDR) sur chaque site configuré, en **mode manuel** ou **automatique** (intervalle configurable).
 - Prise en charge de **plusieurs sites** (centrales) simultanément.
 - Conservation du fichier brut d'origine dans un dossier **par site**, et archivage par site.
-- Suppression optionnelle des données sur la centrale après transfert.
 - Import de fichiers bruts existants pour reconstituer l'historique.
 - **Journal des transferts** : déroulement détaillé site par site, **erreurs explicites** (connexion impossible, réponse vide, réponse inattendue) et récapitulatif en fin de transfert.
 - **État du dernier transfert par site** affiché sur l'écran d'accueil (réussite ou échec).
